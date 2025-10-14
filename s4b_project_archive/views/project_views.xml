@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<!-- Project views -->
+<!-- 	<record model="ir.ui.view" id="edit_project_archive" >
+		<field name="name">project.project.form.archive</field>
+		<field name="model">project.project</field>
+		<filed name="inherit_id" ref="project.edit_project" />
+		<field name="arch" type="xml">
+			<xpath expr="sheet[1].div[1].button[3]" position="replace">
+				<button name="toggle_active" type="object"
+						confirm="(Un)archiving a project automatically (un)archives its tasks and issues, also (un)archives its analytic account too. Do you want to proceed?"
+						class="oe_stat_button" icon="fa-archive">
+					<field name="active" widget="boolean_button"
+						options='{"terminology": "archive"}'/>
+				</button>
+			</xpath>
+		</field>
+	</record> -->
+</odoo>

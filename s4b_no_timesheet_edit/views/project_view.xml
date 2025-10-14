@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+	<data>
+
+		<record id="project_task_form_view_no_timesheet_amount" model="ir.ui.view">
+			<field name="name">project.task.start.stop.form</field>
+			<field name="model">project.task</field>
+			<field name="inherit_id" ref="project.view_task_form2"/>
+			<field name="arch" type="xml">
+				<field name='unit_amount' position="attributes">
+					<attribute name="groups">hr.group_hr_manager</attribute>
+				</field>
+			</field>
+		</record>
+		
+		<record model="ir.ui.view" id="view_task_form2_no_timesheet_amount">
+			<field name="name">project.task.form.inherited</field>
+			<field name="model">project.task</field>
+			<field name="inherit_id" ref="hr_timesheet.view_task_form2_inherited" />
+			<field name="arch" type="xml">
+				<field name='unit_amount' position="attributes">
+					<attribute name="groups">hr.group_hr_manager</attribute>
+				</field>
+			</field>
+		</record>
+
+	</data>
+</openerp>

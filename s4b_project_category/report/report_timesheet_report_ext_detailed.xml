@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- Hr timesheet template external-->
+        <template id="timesheet_report_ext_detailed">
+            <t t-call="web.html_container">
+                <t t-call="s4b_project_category.s4b_external_layout_wohaf">
+                    <!-- Header -->
+                    <div class="header col-xs-12" style="margin-bottom:6px; padding-left: 30px" align="right">
+                        <img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" alt="Logo" style="max-height: 80px;"/>
+                    </div>
+
+                    <!-- Main content block -->
+                    <main class="container">
+
+                        <!-- Initialize data structures -->
+                        <t t-set="project_ids" t-value="[]"/>
+                        <t t-set="categories" t-value="[]"/>
+                        <t t-set="task_ids" t-value="[]"/>
+                        <t t-set="sum_list" t-value="[]"/>
+
+                        <!-- Fill up data structures -->
+                        <t t-foreach="docs" t-as="l">
+                            <t t-if="l.project_id not in project_ids">
+                                <t t-set="project_ids" t-value="project_ids + [l.project_id]"/>
+                            </t>
+                            <t t-if="l.task_category_id not in categories">
+                                <t t-set="categories" t-value="categories + [l.task_category_id]"/>
+                            </t>
+                            <t t-if="l.task_id not in task_ids">
+                                <t t-set="task_ids" t-value="task_ids + [l.task_id]"/>
+                            </t>
+                        </t>
+
+                        <!-- Body -->
+                        <div class="page">
+                            <style>
+                                .pt-5, .py-5{
+                                    padding-top: 0px !important;
+                                }
+                                .align-right {
+                                    text-align: right;
+                                }
+                            </style>
+                            <!-- Container for title and header -->
+                            <div class="title">
+                                <strong><h1 align="center">Work report - Detailed</h1></strong>
+                                <p align="center">
+                                    <strong>
+                                        <span>Period: <t t-esc="min(l.date for l in docs)"/></span>
+                                        <span> / <t t-esc="max(l.date for l in docs)"/></span>
+                                    </strong>
+                                </p>
+                            </div>
+
+                            <!-- Project Badges -->
+                            <div class="badges">
+                                <p style="margin: 15px 0">
+                                    <t t-foreach="set(project_ids)" t-as="project_id">
+                                        <span class="badge badge-pill badge-secondary" style="background-color:#9f9f9f"><t t-esc="project_id.name"/></span>
+                                    </t>
+                                </p>
+                            </div>
+
+                            <!-- Container for the tables -->
+                            <div class="tables">
+                                <t t-foreach="categories" t-as="category">
+                                    <h4><strong><span style="color: #ec1f26" t-esc="category.name"/></strong></h4>
+                                    
+                                    <!-- Creating a temp variable for storing the sum of the tasks by type, because subtotal is deleted in the inner foreach-->
+                                    <t t-set="sub_total_type" t-value="0.0"/>
+
+                                    <!-- Foreach for grouping by types: every loop is a task -->
+                                    <t t-foreach="task_ids" t-as="task_id">
+                                        <!-- creating a non-page-breakable div, so the tables doesnt lose their names -->
+                                        <div style="page-break-inside: avoid; margin-top:20px;">
+                                            <h5 t-if="task_id.task_category_id.name == category.name" style="margin:10px 0; color: #656565">
+                                                <strong>Task #<t t-esc="task_id.id"/>:</strong> <span t-esc="task_id.name"/>
+                                            </h5>
+
+                                            <table t-if="task_id.task_category_id.name == category.name" class="table table-condensed">
+                                                <thead>
+                                                    <tr style="background-color: #ecebeb">
+                                                        <th style="padding:10px;" align="center">Date</th>
+                                                        <th style="padding:10px;" align="center">User</th>
+                                                        <th style="padding:10px;">Description</th>
+                                                        <th style="padding:10px;" class="align-right">Duration (Hours)</th>
+                                                        <th style="padding:10px;" class="align-right">Duration Accountable(Hours)</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <t t-set="sub_total" t-value="0.0"/>
+                                                    <t t-set="sub_total_accountable" t-value="0.0"/>
+                                                    <t t-foreach="docs" t-as="o">
+                                                        <!-- Added condition task_id==o.task_id, so only those task lines will be shown that belongs to the task -->
+                                                        <tr t-if="category == o.task_category_id and task_id == o.task_id">
+                                                            <td style="padding:10px;"><span t-field="o.date"/></td>
+                                                            <td style="padding:10px;"><span t-field="o.user_id.name"/></td>
+                                                            <td style="padding:10px;"><span t-field="o.name"/></td>
+                                                            <td style="padding:10px;" class="align-right"><span t-esc="'%.2f'% o.unit_amount"/></td>
+                                                            <td style="padding:10px;" class="align-right"><span t-esc="'%.2f'% o.accountable_amount"/></td>
+                                                            <t t-set="sub_total" t-value="sub_total + o.unit_amount"/>
+                                                            <t t-set="sub_total_accountable" t-value="sub_total_accountable + o.accountable_amount"/>
+                                                        </tr>
+                                                    </t>
+                                                        <tr>
+                                                            <td/>
+                                                            <td/>
+                                                            <td style="padding:10px; color: #656565" class="align-right"><strong>Subtotal:</strong></td>
+                                                            <td style="padding:10px; color: #656565" class="align-right"><strong><t t-esc="'%.2f'% sub_total"/></strong></td>
+                                                            <td style="padding:10px; color: #656565" class="align-right"><strong><t t-esc="'%.2f'% sub_total_accountable"/></strong></td>
+                                                        </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </t>
+                                    <p style="page-break-before:always;"> </p>
+                                </t>
+                            </div>
+                        </div>
+                    </main>
+                    <!-- Footer -->
+                    <t t-set="footer_company" t-value="o.company_id if o and 'company_id' in o else res_company"/>
+                    <div t-attf-class="o_company_#{footer_company.id}_layout footer o_background_footer">
+                        <div class="text-center">
+                            <ul class="list-inline">
+                                <div t-field="footer_company.report_footer"/>
+                            </ul>
+                            <div t-if="report_type == 'pdf'" class="text-muted">
+                                Page: <span class="page"/> of <span class="topage"/>
+                            </div>
+                            <div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+                                <span t-field="o.name"/>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+		</template>
+        <!-- Hr timesheet document external grouped -->
+        <report
+            id="action_hr_timesheet_ext"
+            model="account.analytic.line"
+            string="Work report - Detailed"
+            report_type="qweb-pdf"
+            name="s4b_project_category.timesheet_report_ext_detailed"
+            file="s4b_project_category.timesheet_report_ext_detailed"/>
+    </data>
+</odoo>

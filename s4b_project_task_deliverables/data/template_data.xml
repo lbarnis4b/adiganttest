@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo noupdate="1">
+
+	<!-- You can add task fields to this list, to be restrictive for making a template. -->
+	<record id="project_template_invalid_task_fields_list" model="ir.config_parameter">
+		<field name="key">invalid.fields</field>
+		<field name="value">['timesheet_ids','stock_move_ids','analytic_line_ids','deliverables_ids']</field>
+	</record>
+
+
+</odoo>

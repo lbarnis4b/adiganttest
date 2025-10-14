@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<openerp>
+    <data>
+        <record model="ir.cron" id="deliv_alert_cronjob">
+            <field name="name">Deliverables Alerts</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="nextcall" eval="(DateTime.now() + relativedelta(days=1)).strftime('%Y-%m-%d 00:00:00')" />
+            <field name="doall" eval="False"/>
+            <field name="model_id" ref="project.model_project_task"/>
+			<field name="state">code</field>
+            <field name="code">model.deliverable_alerts()</field>		
+        </record>
+
+        <record id="deliv_alert" model="mail.template">
+            <field name="name">Alerts for Deliverables</field>
+            <field name="model_id" ref="s4b_project_task_deliverables.model_project_task_deliverables"/>
+            <field name="subject">{{object.name}} deliverable alert></field>
+            <field name="body_html" type="html">
+				<div style="font-family: 'Lucica Grande', Ubuntu, Arial, Verdana, sans-serif; font-size: 12px; color: rgb(34, 34, 34); background-color: #FFF; ">
+					<div style="padding:0px;width:600px;margin:auto;background: #FFFFFF repeat top /100%;color:#777777">
+						<p>Hello, this is the <strong><t t-out="object.name"/></strong> deliverable alert.</p>
+						<p>Responsible: <strong><t t-out="object.responsible.name or ''"/></strong></p>
+						<p>Project: <strong><t t-out="object.project_id.display_name or ''"/></strong></p>
+						<p>Task: <strong><t t-out="object.task_id.name or ''"/></strong></p>	
+						<p>Planned date <strong><t t-out="object.planned_date or ''"/></strong></p>
+						<p>Delivery date <strong><t t-out="object.delivery_date or ''"/></strong></p>
+						<p>Alert date <strong><t t-out="object.alert_date or ''"/></strong></p>
+						<p>Comment: <strong><t t-out="object.comment or ''"/></strong></p>	
+					</div>
+				</div>
+            </field>
+            <field name="auto_delete" eval="False"/>
+        </record>
+    </data>
+</openerp>

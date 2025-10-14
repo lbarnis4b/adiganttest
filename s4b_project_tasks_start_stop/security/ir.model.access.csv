@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+create_write_users_fields,create.write.users.fields,base.model_res_users,project.group_project_user,0,1,0,0
+bogus,bogus,model_project_task_audit,project.group_project_user,1,1,1,1
+

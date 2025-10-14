@@ -1,0 +1,79 @@
+<odoo>
+
+	<!-- Project views -->
+
+	<record id="view_project_project_filter_category" model="ir.ui.view">
+		<field name="name">project.project.select.category</field>
+		<field name="model">project.project</field>
+		<field name="inherit_id" ref="project.view_project_project_filter"/>
+		<field name="arch" type="xml">
+			<field name="tag_ids" position="before">
+				<field name="project_category_id"/>
+			</field>
+			<xpath expr="//group[1]" position="inside">				
+				<filter string="Category" name="groupby_category" context="{'group_by': 'project_category_id'}"/>
+			</xpath>
+		</field>
+	</record>
+
+     <record id="project_category_inherited_project_project_form_view" model="ir.ui.view">
+        <field name="name">project.category.inherited.project.project.form.view</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+             <xpath expr="//sheet/group/group[1]" position="inside">
+                <field name="project_category_id" options="{'no_create_edit': True, 'no_create': True}"/>
+				<field name="color" invisible="0"/>
+            </xpath>
+        </field>
+    </record>
+	
+    <record id="project_category_inherited_project_project_tree_view" model="ir.ui.view">
+        <field name="name">project.category.inherited.project.project.tree.view</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='company_id']" position="before">
+                <field name="project_category_id" options="{'no_create_edit': True, 'no_create': True}"/>
+            </xpath>
+        </field>
+    </record>
+	
+    <record id="project_category_inherited_project_project_kanban_view" model="ir.ui.view">
+        <field name="name">project.category.inherited.project.project.kanban.view</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_kanban"/>
+        <field name="arch" type="xml">
+<!-- 			<xpath expr="//kanban" position="attributes">
+				<attribute name="default_group_by">project_category_id</attribute>
+			</xpath> -->
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <field name="project_category_id"/>
+				<field name="color" />
+            </xpath>
+            <xpath expr="//div[hasclass('o_primary')]/span[1]" position="after">
+				<span class="o_text_overflow" t-if="record.project_category_id.value">
+					<span class="fa fa-eye mr-2" aria-label="Category" title="Category"></span><t t-esc="record.project_category_id.value"/>
+				</span>
+				<div role="separator" class="dropdown-divider"/>
+            </xpath>
+        </field>
+    </record>
+	
+	<!-- Task views -->
+	<record id="project_task_category_view_task_form" model="ir.ui.view">
+		<field name="name">project.task.form</field>
+		<field name="model">project.task</field>
+		<field name="inherit_id" ref="project.view_task_form2"/>
+		<field name="arch" type="xml">
+			<field name="user_ids" position="after">
+				<field name="task_category_id" placeholder="Task Category" required="1"/>
+				<field name="color" invisible="0"/>
+			</field>
+<!-- 			<xpath expr="//field[@name='date_deadline']" position="after">
+				<field name="start_date" widget="date"/>
+				<field name="end_date" widget="date"/>
+			</xpath> -->
+		</field>
+	</record>
+</odoo>

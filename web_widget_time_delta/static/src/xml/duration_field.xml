@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Legacy template -->
+    <t t-name="web_widget_time_delta.LegacyFieldTimeDelta">
+        <div class="o_field_time_delta">
+            <span t-if="widget.mode === 'readonly'" t-esc="widget._formatValue(widget.value)"/>
+            <input t-else="" type="text" 
+                t-att-id="_.uniqueId('timedelta_')" 
+                class="o_input timedelta"
+                t-att-value="widget.value"/>
+        </div>
+    </t>
+
+</templates>

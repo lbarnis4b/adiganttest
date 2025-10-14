@@ -1,0 +1,588 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<data>
+		<!-- Hr timesheet template external detailed with both duration and duration accountable-->
+		<template id="timesheet_report_ext_grouped">
+			<t t-call="web.html_container">
+				<t t-call="s4b_project_category.s4b_external_layout_wohaf">
+					<!-- Header -->
+					<div class="header col-xs-12" style="margin-bottom:6px; padding-left: 30px" align="right">
+						<img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" alt="Logo" style="max-height: 80px;" />
+					</div>
+
+					<!-- Main content block -->
+					<main class="container">
+						<!-- Initialize data structures -->
+						<t t-set="project_ids" t-value="[]"/>
+						<t t-set="categories" t-value="[]"/>
+						<t t-set="task_ids" t-value="[]"/>
+						<t t-set="task_type_groups" t-value="[]"/>
+
+						<!-- Fill up data structures -->
+						<t t-foreach="docs" t-as="l">
+							<t t-set="project_ids" t-value="project_ids + [l.project_id]"/>
+							<t t-set="categories" t-value="categories + [l.task_category_id]"/>
+							<t t-set="task_ids" t-value="task_ids + [l.task_id]"/>
+						</t>
+
+						<!-- Body -->
+						<div class="page">
+							<style>
+								.pt-5, .py-5{
+									padding-top: 0px !important;
+								}
+								.align-right {
+									text-align: right;
+								}
+							</style>
+
+							<!-- Title and Header -->
+							<div class="title" style="margin-bottom:20px !important">
+								<strong><h1 align="center">Work report - Grouped</h1></strong>
+								<p align="center">
+									<strong>
+										<t t-set="start_date" t-value="min(l.date for l in docs)"/>
+										<span>Period: <t t-esc="start_date"/></span>
+										<span> - <t t-esc="max(l.date for l in docs)"/></span>
+									</strong>
+								</p>
+							</div>
+
+							<!-- Project Badges -->
+							<div class="badges">
+								<p style="margin: 15px 0">
+									<t t-foreach="set(project_ids)" t-as="project_id">
+										<span class="badge badge-pill badge-secondary" style="background-color:#9f9f9f"><t t-esc="project_id.name"/></span>
+									</t>
+								</p>
+							</div>
+
+							<!-- Total Hours by Task Type -->
+							<div class="subtitle">
+								<h3 style="color: #ec1f26; margin-bottom:20px;"><strong>Total hours grouped by task type:</strong></h3>
+							</div>
+
+							<!-- Task Categories -->
+							<t t-foreach="set(categories)" t-as="category">
+								<div class="subtitle">
+									<h4 style="margin-bottom:10px;"><strong><t t-esc="category.name"/></strong></h4>
+								</div>
+								<div class="task_category_sum">
+									<table class="table table-condensed" style="page-break-inside: avoid">
+										<thead>
+											<tr style="background-color: #ecebeb">
+												<th style="padding:10px; width:50%" align="center">Task</th>
+												<th style="padding:10px; width:25%" class="align-right">Duration (Hours)</th>
+												<th style="padding:10px; width:25%" class="align-right">Duration Accountable (Hours)</th>
+											</tr>
+										</thead>
+										<tbody>
+											<t t-foreach="set(task_ids)" t-as="task">
+												<t t-set="task_duration" t-value="0.0"/>
+												<t t-set="accountable_duration" t-value="0.0"/>
+												<!-- Calculate duration and accountable duration for each task -->
+												<t t-foreach="docs" t-as="o">
+													<t t-if="o.task_id == task and o.task_category_id == category">
+														<t t-set="task_duration" t-value="task_duration + o.unit_amount"/>
+														<t t-set="accountable_duration" t-value="accountable_duration + o.accountable_amount"/>
+													</t>
+												</t>
+												<tr t-if="task.task_category_id == category">
+													<td style="padding:10px;"><t t-esc="task.name"/></td>
+													<td style="padding:10px;" class="align-right"><t t-esc="'%.2f' % task_duration"/></td>
+													<td style="padding:10px;" class="align-right"><t t-esc="'%.2f' % accountable_duration"/></td>
+												</tr>
+											</t>
+											<!-- Subtotal by category -->
+											<tr>
+												<td style="padding:10px;" class="align-right"><strong>Subtotal</strong></td>
+												<td style="padding:10px;" class="align-right">
+													<strong>
+														<t t-set="subtotal" t-value="sum(o.unit_amount for o in docs if o.task_category_id == category)"/>
+														<t t-esc="'%.2f' % subtotal"/>
+													</strong>
+												</td>
+												<td style="padding:10px;" class="align-right">
+													<strong>
+														<t t-set="subtotal_accountable" t-value="sum(o.accountable_amount for o in docs if o.task_category_id == category)"/>
+														<t t-esc="'%.2f' % subtotal_accountable"/>
+													</strong>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</t>
+
+							<!-- Total Duration -->
+							<div class="total_duration">
+								<table class="table">
+									<tr>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>Total Duration:</strong>
+										</td>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>
+												<t t-set="total_duration" t-value="sum(o.unit_amount for o in docs)"/>
+												<t t-esc="'%.2f' % total_duration"/>
+											</strong>
+										</td>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>
+												<t t-set="total_duration_accountable" t-value="sum(o.accountable_amount for o in docs)"/>
+												<t t-esc="'%.2f' % total_duration_accountable"/>
+											</strong>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</main>
+
+					<!-- Footer -->
+					<t t-set="footer_company" t-value="o.company_id if o and 'company_id' in o else res_company"/>
+					<div t-attf-class="o_company_#{footer_company.id}_layout footer o_background_footer">
+						<div class="text-center">
+							<ul class="list-inline">
+								<div t-field="footer_company.report_footer"/>
+							</ul>
+							<div t-if="report_type == 'pdf'" class="text-muted">
+								Page: <span class="page"/> of <span class="topage"/>
+							</div>
+							<div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+								<span t-field="o.name"/>
+							</div>
+						</div>
+					</div>
+				</t>
+			</t>
+		</template>
+
+		<!-- Hr timesheet template external detailed just with duration-->
+		<!-- All Task Type Groups-->
+		<template id="timesheet_report_ext_grouped_with_duration">
+			<t t-call="web.html_container">
+				<t t-call="s4b_project_category.s4b_external_layout_wohaf">
+					<!-- Header -->
+					<div class="header col-xs-12" style="margin-bottom:6px; padding-left: 30px" align="right">
+						<img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" alt="Logo" style="max-height: 80px;"/>
+					</div>
+
+					<!-- Main content block -->
+					<main class="container">
+						<!-- Initialize data structures -->
+						<t t-set="project_ids" t-value="set(l.project_id for l in docs)"/>
+						<t t-set="categories" t-value="set(l.task_category_id for l in docs)"/>
+						<t t-set="task_ids" t-value="set(l.task_id for l in docs)"/>
+
+						<!-- Body -->
+						<div class="page">
+							<style>
+								.pt-5, .py-5{
+									padding-top: 0px !important;
+								}
+								.align-right {
+									text-align: right;
+								}
+							</style>
+							
+							<!-- Title and Header -->
+							<div class="title" style="margin-bottom:20px !important">
+								<strong><h1 align="center">Work report - Grouped</h1></strong>
+								<p align="center">
+									<strong>
+										<span>Period: <t t-esc="min(l.date for l in docs)"/></span>
+										<span> - <t t-esc="max(l.date for l in docs)"/></span>
+									</strong>
+								</p>
+							</div>
+
+							<!-- Project Badges -->
+							<div class="badges">
+								<p style="margin: 15px 0">
+									<t t-foreach="project_ids" t-as="project_id">
+										<span class="badge badge-pill badge-secondary" style="background-color:#9f9f9f"><t t-esc="project_id.name"/></span>
+									</t>
+								</p>
+							</div>
+
+							<!-- Total Hours by Task Type -->
+							<div class="subtitle">
+								<h3 style="color: #ec1f26; margin-bottom:20px;"><strong>Total hours grouped by task type:</strong></h3>
+							</div>
+
+							<!-- Task Categories -->
+							<t t-foreach="categories" t-as="category">
+								<div class="subtitle">
+									<h4 style="margin-bottom:10px;"><strong><t t-esc="category.name"/></strong></h4>
+								</div>
+								<div class="task_category_sum">
+									<!-- Table for task category sum -->
+									<table class="table table-condensed" style="page-break-inside: avoid">
+										<thead>
+											<tr style="background-color: #ecebeb">
+												<th style="padding:10px; width:60%" align="center">Task</th>
+												<th style="padding:10px; width:20%" class="align-right">Duration (Hours)</th>
+											</tr>
+										</thead>
+										<tbody>
+											<t t-set="subtotal" t-value="0.0"/>
+											<t t-foreach="task_ids" t-as="task">
+												<t t-if="task.task_category_id == category">
+													<t t-set="task_duration" t-value="sum(o.unit_amount for o in docs if o.task_id == task)"/>
+													<tr>
+														<td style="padding:10px;"><t t-esc="task.name"/></td>
+														<td style="padding:10px;" class="align-right"><t t-esc="'%.2f' % task_duration"/></td>
+													</tr>
+													<t t-set="subtotal" t-value="subtotal + task_duration"/>
+												</t>
+											</t>
+											<tr>
+												<td style="padding:10px;" class="align-right"><strong>Subtotal</strong></td>
+												<td style="padding:10px;" class="align-right"><strong><t t-esc="'%.2f' % subtotal"/></strong></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</t>
+
+							<!-- Total Duration -->
+							<div class="total_duration">
+								<table class="table">
+									<tr>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right"><strong>Total Duration:</strong></td>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>
+												<t t-set="total_duration" t-value="sum(o.unit_amount for o in docs)"/>
+												<t t-esc="'%.2f' % total_duration"/>
+											</strong>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</main>
+
+					<!-- Footer -->
+					<t t-set="footer_company" t-value="o.company_id if o and 'company_id' in o else res_company"/>
+					<div t-attf-class="o_company_#{footer_company.id}_layout footer o_background_footer">
+						<div class="text-center">
+							<ul class="list-inline">
+								<div t-field="footer_company.report_footer"/>
+							</ul>
+							<div t-if="report_type == 'pdf'" class="text-muted">
+								Page: <span class="page"/> of <span class="topage"/>
+							</div>
+							<div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+								<span t-field="o.name"/>
+							</div>
+						</div>
+					</div>
+				</t>
+			</t>
+		</template>
+
+		<!-- Hr timesheet template external detailed just with duration-->
+		<!-- just Task Type Group == eval-->
+		<template id="timesheet_report_eval_grouped_with_duration">
+			<t t-call="web.html_container">
+				<t t-call="s4b_project_category.s4b_external_layout_wohaf">
+					<!-- Header -->
+					<div class="header col-xs-12" style="margin-bottom:6px; padding-left: 30px" align="right">
+						<img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" alt="Logo" style="max-height: 80px;"/>
+					</div>
+
+					<!-- Main content block -->
+					<main class="container">
+						<!-- Initialize data structures -->
+						<t t-set="project_ids" t-value="set(l.project_id for l in docs if l.task_category_id.task_type_group == 'eval')"/>
+						<t t-set="categories" t-value="set(l.task_category_id for l in docs if l.task_category_id.task_type_group == 'eval')"/>
+						<t t-set="task_ids" t-value="set(l.task_id for l in docs if l.task_category_id.task_type_group == 'eval')"/>
+
+						<!-- Body -->
+						<div class="page">
+							<style>
+								.pt-5, .py-5 {
+									padding-top: 0px !important;
+								}
+								.align-right {
+									text-align: right;
+								}
+							</style>
+							
+							<!-- Title and Header -->
+							<div class="title" style="margin-bottom:20px !important">
+								<strong><h1 align="center">Evaluation Work Report - Grouped</h1></strong>
+								<p align="center">
+									<strong>
+										<span>Period: <t t-esc="min(l.date for l in docs if l.task_category_id.task_type_group == 'eval')"/></span>
+										<span> - <t t-esc="max(l.date for l in docs if l.task_category_id.task_type_group == 'eval')"/></span>
+									</strong>
+								</p>
+							</div>
+
+							<!-- Project Badges -->
+							<div class="badges">
+								<p style="margin: 15px 0">
+									<t t-foreach="project_ids" t-as="project_id">
+										<span class="badge badge-pill badge-secondary" style="background-color:#9f9f9f"><t t-esc="project_id.name"/></span>
+									</t>
+								</p>
+							</div>
+
+							<!-- Total Hours by Task Type -->
+							<div class="subtitle">
+								<h3 style="color: #ec1f26; margin-bottom:20px;"><strong>Total evaluation hours grouped by task type:</strong></h3>
+							</div>
+
+							<!-- Task Categories -->
+							<t t-foreach="categories" t-as="category">
+								<div class="subtitle">
+									<h4 style="margin-bottom:10px;"><strong><t t-esc="category.name"/></strong></h4>
+								</div>
+								<div class="task_category_sum">
+									<!-- Table for task category sum -->
+									<table class="table table-condensed" style="page-break-inside: avoid">
+										<thead>
+											<tr style="background-color: #ecebeb">
+												<th style="padding:10px; width:60%" align="center">Task</th>
+												<th style="padding:10px; width:20%" class="align-right">Duration (Hours)</th>
+											</tr>
+										</thead>
+										<tbody>
+											<t t-set="subtotal" t-value="0.0"/>
+											<t t-foreach="task_ids" t-as="task">
+												<t t-if="task.task_category_id == category">
+													<t t-set="task_duration" t-value="sum(o.unit_amount for o in docs if o.task_id == task and o.task_category_id.task_type_group == 'eval')"/>
+													<tr>
+														<td style="padding:10px;"><t t-esc="task.name"/></td>
+														<td style="padding:10px;" class="align-right"><t t-esc="'%.2f' % task_duration"/></td>
+													</tr>
+													<t t-set="subtotal" t-value="subtotal + task_duration"/>
+												</t>
+											</t>
+											<tr>
+												<td style="padding:10px;" class="align-right"><strong>Subtotal</strong></td>
+												<td style="padding:10px;" class="align-right"><strong><t t-esc="'%.2f' % subtotal"/></strong></td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</t>
+
+							<!-- Total Duration -->
+							<div class="total_duration">
+								<table class="table">
+									<tr>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right"><strong>Total Duration:</strong></td>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>
+												<t t-set="total_duration" t-value="sum(o.unit_amount for o in docs if o.task_category_id.task_type_group == 'eval')"/>
+												<t t-esc="'%.2f' % total_duration"/>
+											</strong>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</main>
+
+					<!-- Footer -->
+					<t t-set="footer_company" t-value="o.company_id if o and 'company_id' in o else res_company"/>
+					<div t-attf-class="o_company_#{footer_company.id}_layout footer o_background_footer">
+						<div class="text-center">
+							<ul class="list-inline">
+								<div t-field="footer_company.report_footer"/>
+							</ul>
+							<div t-if="report_type == 'pdf'" class="text-muted">
+								Page: <span class="page"/> of <span class="topage"/>
+							</div>
+							<div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+								<span t-field="o.name"/>
+							</div>
+						</div>
+					</div>
+				</t>
+			</t>
+		</template>
+
+		<!-- Hr timesheet template external detailed just with duration accountable-->
+		<template id="timesheet_report_ext_grouped_with_duration_accountable">
+			<t t-call="web.html_container">
+				<t t-call="s4b_project_category.s4b_external_layout_wohaf">
+					<!-- Header -->
+					<div class="header col-xs-12" style="margin-bottom:6px; padding-left: 30px" align="right">
+						<img t-if="res_company.logo" t-att-src="image_data_uri(res_company.logo)" alt="Logo" style="max-height: 80px;" />
+					</div>
+
+					<!-- Main content block -->
+					<main class="container">
+						<!-- Initialize data structures -->
+						<t t-set="project_ids" t-value="[]"/>
+						<t t-set="categories" t-value="[]"/>
+						<t t-set="task_ids" t-value="[]"/>
+						<t t-set="task_type_groups" t-value="[]"/>
+						<t t-set="sum_task_type_list" t-value="[]"/>
+
+						<!-- Fill up data structures -->
+						<t t-foreach="docs" t-as="l">
+							<t t-set="project_ids" t-value="project_ids + [l.project_id]"/>
+							<t t-set="categories" t-value="categories + [l.task_category_id]"/>
+							<t t-set="task_type_groups" t-value="task_type_groups + [l.task_category_id.task_type_group]"/>
+							<t t-set="task_ids" t-value="task_ids + [l.task_id]"/>
+						</t>
+
+						<!-- Body -->
+						<div class="page">
+							<style>
+								.pt-5, .py-5{
+									padding-top: 0px !important;
+								}
+								.align-right {
+									text-align: right;
+								}
+							</style>
+							
+							<!-- Title and Header -->
+							<div class="title" style="margin-bottom:20px !important">
+								<strong><h1 align="center">Work report - Grouped</h1></strong>
+								<p align="center">
+									<strong>
+										<t t-set="start_date" t-value="min(l.date for l in docs)"/>
+										<span>Period: <t t-esc="start_date"/></span>
+										<span> - <t t-esc="max(l.date for l in docs)"/></span>
+									</strong>
+								</p>
+							</div>
+
+							<!-- Project Badges -->
+							<div class="badges">
+								<p style="margin: 15px 0">
+									<t t-foreach="set(project_ids)" t-as="project_id">
+										<span class="badge badge-pill badge-secondary" style="background-color:#9f9f9f"><t t-esc="project_id.name"/></span>
+									</t>
+								</p>
+							</div>
+
+							<!-- Total Hours by Task Type -->
+							<div class="subtitle">
+								<h3 style="color: #ec1f26; margin-bottom:20px;"><strong>Total hours grouped by task type:</strong></h3>
+							</div>
+
+							<!-- Task Categories -->
+							<!-- Grouping by categories and tasks -->
+							<t t-foreach="set(categories)" t-as="category">
+								<div class="subtitle">
+									<h4 style="margin-bottom:10px;"><strong><t t-esc="category.name"/></strong></h4>
+								</div>
+								<div class="task_category_sum">
+									<table class="table table-condensed" style="page-break-inside: avoid">
+										<thead>
+											<tr style="background-color: #ecebeb">
+												<th style="padding:10px; width:60%" align="center">Task</th>
+												<th style="padding:10px; width:20%" class="align-right">Duration Accountable (Hours)</th>
+											</tr>
+										</thead>
+										<tbody>
+											<t t-foreach="set(task_ids)" t-as="task">
+												<t t-set="accountable_duration" t-value="0.0"/>
+												<!-- Calculate duration for each task -->
+												<t t-foreach="docs" t-as="o">
+													<t t-if="o.task_id == task and o.task_category_id == category">
+														<t t-set="accountable_duration" t-value="accountable_duration + o.accountable_amount"/>
+													</t>
+												</t>
+												<tr t-if="task.task_category_id == category">
+													<td style="padding:10px;"><t t-esc="task.name"/></td>
+													<td style="padding:10px;" class="align-right"><t t-esc="'%.2f' % accountable_duration"/></td>
+												</tr>
+											</t>
+											<!-- Subtotal by category -->
+											<tr>
+												<td style="padding:10px;" class="align-right"><strong>Subtotal</strong></td>
+												<td style="padding:10px;" class="align-right">
+													<strong>
+														<t t-set="subtotal_accountable" t-value="sum(o.accountable_amount for o in docs if o.task_category_id == category)"/>
+														<t t-esc="'%.2f' % subtotal_accountable"/>
+													</strong>
+												</td>
+											</tr>
+										</tbody>
+									</table>
+								</div>
+							</t>
+
+							<!-- Total Duration -->
+							<div class="total_duration">
+								<table class="table">
+									<tr>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>Total Duration:</strong>
+										</td>
+										<td style="padding:10px; border: none; background-color: #ec1f26; color:#fff; font-size:20px" class="align-right">
+											<strong>
+												<t t-set="total_duration" t-value="sum(o.accountable_amount for o in docs)"/>
+												<t t-esc="'%.2f' % total_duration"/>
+											</strong>
+										</td>
+									</tr>
+								</table>
+							</div>
+						</div>
+					</main>
+
+					<!-- Footer -->
+					<t t-set="footer_company" t-value="o.company_id if o and 'company_id' in o else res_company"/>
+					<div t-attf-class="o_company_#{footer_company.id}_layout footer o_background_footer">
+						<div class="text-center">
+							<ul class="list-inline">
+								<div t-field="footer_company.report_footer"/>
+							</ul>
+							<div t-if="report_type == 'pdf'" class="text-muted">
+								Page: <span class="page"/> of <span class="topage"/>
+							</div>
+							<div t-if="report_type == 'pdf' and display_name_in_footer" class="text-muted">
+								<span t-field="o.name"/>
+							</div>
+						</div>
+					</div>
+				</t>
+			</t>
+		</template>
+
+
+		
+
+		<report
+			id="action_hr_timesheet_ext_sum_detailed"
+			model="account.analytic.line"
+			string="Work report - Grouped"
+			report_type="qweb-pdf"
+			name="s4b_project_category.timesheet_report_ext_grouped"
+			file="s4b_project_category.timesheet_report_ext_grouped"/>
+
+		<report 
+			id="action_hr_timesheet_ext_sum_detailed_with_duration" 
+			model="account.analytic.line" 
+			string="Work report - Grouped - with duration hours" 
+			report_type="qweb-pdf" 
+			name="s4b_project_category.timesheet_report_ext_grouped_with_duration" 
+			file="s4b_project_category.timesheet_report_ext_grouped_with_duration"/>
+
+		<report 
+			id="action_hr_timesheet_ext_sum_detailed_with_duration_accountable" 
+			model="account.analytic.line" 
+			string="Work report - Grouped - with accountable hours" 
+			report_type="qweb-pdf" 
+			name="s4b_project_category.timesheet_report_ext_grouped_with_duration_accountable" 
+			file="s4b_project_category.timesheet_report_ext_grouped_with_duration_accountable"/>	
+
+		<report 
+			id="action_hr_timesheet_eval_sum_detailed_with_duration" 
+			model="account.analytic.line" 
+			string="Evaluation Work report - Grouped - with duration hours" 
+			report_type="qweb-pdf" 
+			name="s4b_project_category.timesheet_report_eval_grouped_with_duration" 
+			file="s4b_project_category.timesheet_report_eval_grouped_with_duration"/>
+	</data>
+</odoo>

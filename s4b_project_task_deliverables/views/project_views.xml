@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<data>
+
+	<record id="view_task_form2" model="ir.ui.view">
+		<field name="name">project.task.form</field>
+		<field name="model">project.task</field>
+		<field name="inherit_id" ref="project.view_task_form2"/>
+		<field eval="2" name="priority"/>
+		<field name="arch" type="xml">
+		<xpath expr="//notebook/page[2]" position="before" >
+			<page string="Deliverables" >
+				<field name="deliverables_ids" mode="tree" >
+					<tree string="Deliverables" editable="bottom"
+					decoration-danger="planned_date and (planned_date&lt;current_date) and (not delivery_date) and (not finalized)" 
+					decoration-success="finalized">
+						<button name="alive_on_off" type="object" class="btn-primary" icon="fa-power-off"/>
+						<field name="alert_alive" readonly="1"/>
+						<field name="name"/>
+						<field name="responsible"/>
+						<field name="planned_date"/>
+						<field name="delivery_date"/>
+						<field name="deliverable_type_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+						<field name="deliverable_stage_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+						<field name="comment"/>
+						<field name="alert_date" />					
+						<field name="finalized" invisible="1" />
+					</tree>
+				</field>
+			</page>
+		</xpath>
+		</field>
+	</record>
+	 
+</data>
+</odoo>

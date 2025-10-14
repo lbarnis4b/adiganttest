@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--record id="hr_timesheet_line_search_color" model="ir.ui.view">
+            <field name="name">account.analytic.line.search.color</field>
+            <field name="model">account.analytic.line</field>
+			<field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_search"/>
+            <field name="arch" type="xml">
+				<field name="name" position="after">
+					<field name="task_category_id" />
+				</field>
+				<xpath expr="//search/group[1]/filter[1]" position="before">
+					<filter string="Task type" domain="[]" context="{'group_by':'task_category_id'}"/>
+				</xpath>
+            </field>
+        </record-->
+
+        <record id="hr_timesheet_line_tree_add_accountable_amount" model="ir.ui.view">
+            <field name="name">account.analytic.line.tree.hr_timesheet.add.accountable.amount</field>
+            <field name="model">account.analytic.line</field>
+			<field name="inherit_id" ref="hr_timesheet.hr_timesheet_line_tree"/>
+            <field name="arch" type="xml">
+				<field name="unit_amount" position="after">
+					<field name="accountable_amount"  sum="Total Accountable Amount"  widget="float_time" groups="s4b_project_category.accountable_group_user"/>
+				</field>
+            </field>
+        </record>
+
+    </data>
+</odoo>

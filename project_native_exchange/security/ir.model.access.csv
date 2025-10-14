@@ -1,0 +1,6 @@
+"id","name","model_id:id","group_id:id","perm_read","perm_write","perm_create","perm_unlink"
+access_project.native.exchange,project.native.exchange,model_project_native_exchange,project.group_project_user,1,1,1,1
+access_project.native.exchange.import,project.native.exchange.import,model_project_native_exchange_import,project.group_project_user,1,1,1,1
+access_project.native.exchange.import.task.line,project.native.exchange.import.task.line,model_project_native_exchange_import_task_line,project.group_project_user,1,1,1,1
+access_project.native.exchange.import.prj.line,project.native.exchange.import.prj.line,model_project_native_exchange_import_prj_line,project.group_project_user,1,1,1,1
+access_project.native.exchange.tool,project.native.exchange.tool,model_project_native_exchange_tool,project.group_project_user,1,1,1,1

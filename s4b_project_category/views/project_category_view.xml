@@ -1,0 +1,92 @@
+<odoo>
+     <record id="project_task_category_tree_view" model="ir.ui.view">
+        <field name="name">project.task.category.tree.view</field>
+        <field name="model">project.task.category</field>
+        <field name="arch" type="xml">
+            <tree editable="bottom">
+				<field name="id" groups="base.group_no_one"/>
+				<field name="odoo10_id"/>
+                <field name="name"/>
+				<field name="project_ids" widget="many2many_tags" optional="hide"/>
+				<field name="task_ids" widget="many2many_tags" optional="hide"/>
+				<field name="color" />
+				<field name="accountability" optional="hide"/>
+				<field name="category_type" />
+				<field name="task_type_group"/>
+                <field name="active" />
+				<field name="fold" />
+            </tree>
+        </field>
+    </record>
+
+	<record model="ir.ui.view" id="project_task_category_kanban_view">
+		<field name="name">project.task.category.kanban.view</field>
+		<field name="model">project.task.category</field>
+		<field name="arch" type="xml">
+			<kanban class="oe_background_grey o_kanban_dashboard o_project_kanban">
+				<field name="name"/>
+				<field name="category_type"/>
+				<field name="color"/>
+				<templates>
+					<t t-name="kanban-box">
+						<div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
+							<div class="o_project_kanban_main">
+								<div class="o_kanban_card_content o_visible">
+									<div class="o_kanban_primary_left">
+										<div class="o_primary">
+											<span><t t-esc="record.name.value"/></span>
+										</div>
+										<div class="o_primary">
+											<span><t t-esc="record.category_type.value"/></span>
+										</div>
+										<div class="o_primary">
+											<span><t t-esc="record.color.value"/></span>
+										</div>
+										<div t-if="widget.editable" class="o_project_kanban_colorpicker">
+											<ul class="oe_kanban_colorpicker" data-field="color"/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>	
+
+     <record id="project_task_category_form_view" model="ir.ui.view">
+        <field name="name">project.task.category.form.view</field>
+        <field name="model">project.task.category</field>
+        <field name="arch" type="xml">
+            <form string="Project/Task category">
+				<sheet>
+					<group>
+						<field name="id" groups="base.group_no_one"/>
+						<field name="odoo10_id" invisible="1"/>
+						<field name="name"/>
+						<field name="color" />
+						<field name="category_type" />
+						<field name="task_type_group" attrs="{'required':[('category_type','=','task')]}"/>
+						<field name="accountability" />
+						<field name="active" />
+						<field name="fold" />
+					</group>
+					<group>
+						<field name="project_ids" widget="many2many_tags"/>
+						<field name="task_ids" widget="many2many_tags"/>
+					</group>
+				</sheet>
+            </form>
+        </field>
+    </record>
+	
+     <record id="action_project_task_category" model="ir.actions.act_window">
+        <field name="name">Project/Task Category</field>
+        <field name="res_model">project.task.category</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+	
+    <menuitem parent="project.menu_project_config" id="menu_project_task_category" name="Project/Task Category" 
+	action="action_project_task_category" groups="project.group_project_manager"/>
+</odoo>

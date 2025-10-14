@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<record model="ir.ui.view" id="deliverables_tree_view">
+		<field name="name">deliverables.tree</field>
+		<field name="model">project.task.deliverables</field>
+		<field name="arch" type="xml">
+			<tree string="Deliverables" editable="top" 
+			decoration-danger="planned_date and (planned_date&lt;current_date) and (not delivery_date) and (not finalized)" 
+			decoration-success="finalized">
+			<!-- create="1" edit="1" delete="0"
+			decoration-info="alert_alive" -->
+				<button name="alive_on_off" type="object" class="btn-primary" icon="fa-power-off" help="Turn the alerts on and off"/>
+				<field name="alert_alive" readonly="1" />
+				<field name="project_id" required="1" options="{'no_create': True, 'no_create_edit':True}"/>
+				<field name="task_id" options="{'no_create': True, 'no_create_edit':True}"/>
+				<field name="name"/>
+				<field name="responsible"/>
+				<field name="planned_date"/>
+				<field name="delivery_date"/>
+				<field name="deliverable_type_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+				<field name="deliverable_stage_id" options="{'no_create': True, 'no_create_edit':True, 'no_open': True}"/>
+				<field name="comment"/>
+				<field name="alert_date" />			
+				<field name="finalized" invisible="1" />
+			</tree>
+		</field>
+	</record>
+	
+	<record id="deliverables_search" model="ir.ui.view">
+		<field name="name">deliverables.search</field>
+		<field name="model">project.task.deliverables</field>
+		<field name="arch" type="xml">
+			<search string="Deliverables">
+				<field name="name"/>
+				<field name="project_id"/>
+				<field name="task_id"/>
+				<field name="responsible"/>
+				<field name="deliverable_type_id" />
+				<field name="deliverable_stage_id" />
+				<field name="active"/>
+				<filter string="Not finalized" name="active" domain="[('finalized','=',False)]"/>
+				<filter string="Archived" name="inactive" domain="[('active','=',False)]"/>
+				<group expand="0" string="Group By...">
+					<filter string="Task" name="group_task" context="{'group_by':'task_id'}"/>
+					<filter string="Project" name="group_project" context="{'group_by':'project_id'}"/>
+					<filter string="Responsible" name="group_resp" context="{'group_by':'responsible'}"/>
+					<filter string="Type" name="group_type" context="{'group_by':'deliverable_type_id'}"/>
+					<filter string="Stage" name="group_stage" context="{'group_by':'deliverable_stage_id'}"/>
+				</group>
+			</search>
+		</field>
+	</record>
+
+	<record model="ir.actions.act_window" id="deliverables_act">
+		<field name="name">Deliverables</field>
+		<field name="res_model">project.task.deliverables</field>
+		<field name="view_mode">tree</field>
+		<field name="search_view_id" ref="deliverables_search"/>
+	</record>
+
+	<menuitem id="deliverables" name="Deliverables" parent="project.menu_project_report" 
+	sequence="30" action="deliverables_act" groups="project.group_project_manager"/>
+	
+	<menuitem id="deliverables_config" name="Deliverables" parent="project.menu_project_config" 
+	sequence="30" groups="project.group_project_manager"/>
+	
+	<!-- Deliverables Type -->
+
+	<record model="ir.ui.view" id="deliverables_type_kanban_view">
+		<field name="name">deliverables.type.kanban</field>
+		<field name="model">project.task.deliverables.type</field>
+		<field name="arch" type="xml">
+			<kanban class="oe_background_grey o_kanban_dashboard o_crm_kanban" on_create="quick_create">
+				<field name="name"/>
+				<field name="color"/>
+				<templates>
+					<t t-name="kanban-box">
+						<div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
+							<div class="o_crm_kanban_main">
+								<div class="o_kanban_card_content o_visible">
+									<div class="o_kanban_primary_left">
+										<div class="o_primary">
+											<span><t t-esc="record.name.value"/></span>
+										</div>
+										<div t-if="widget.editable" class="o_crm_kanban_colorpicker">
+											<ul class="oe_kanban_colorpicker" data-field="color"/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>		
+	
+	<record model="ir.ui.view" id="deliverables_type_tree_view">
+		<field name="name">deliverables.type.tree</field>
+		<field name="model">project.task.deliverables.type</field>
+		<field name="arch" type="xml">
+			<tree string="Deliverable Types" editable="bottom">
+				<field name="name"/>
+			</tree>
+		</field>
+	</record>
+
+	<record id="deliverables_type_form_view" model="ir.ui.view">
+		<field name="name">deliverables.type.form</field>
+		<field name="model">project.task.deliverables.type</field>
+		<field name="arch" type="xml">
+			<form string="Deliverable Types">
+				<sheet>
+					<group>
+						<field name="name" />
+					</group>
+				</sheet>
+			</form>
+		</field>
+	</record>	
+
+	<record model="ir.actions.act_window" id="deliverables_type_act">
+		<field name="name">Deliverable Types</field>
+		<field name="res_model">project.task.deliverables.type</field>
+		<field name="view_mode">kanban,tree,form</field>
+		<field name="view_id" ref="deliverables_type_kanban_view"/>
+		<field name="help" type="html">
+			<p class="oe_view_nocontent_create">
+				Create a new Type.
+			</p>
+		</field>
+	</record>
+
+	<menuitem id="deliverables_type" name="Types" parent="deliverables_config" 
+	sequence="1" action="deliverables_type_act" groups="project.group_project_manager"/>
+
+	<!-- Deliverables Stages -->
+
+	<record model="ir.ui.view" id="deliverables_stage_kanban_view">
+		<field name="name">deliverables.stage.kanban</field>
+		<field name="model">project.task.deliverables.stage</field>
+		<field name="arch" type="xml">
+			<kanban class="oe_background_grey o_kanban_dashboard o_crm_kanban" on_create="quick_create">
+				<field name="name"/>
+				<field name="is_final"/>
+				<field name="color"/>
+				<templates>
+					<t t-name="kanban-box">
+						<div t-attf-class="#{kanban_color(record.color.raw_value)} oe_kanban_global_click">
+							<div class="o_crm_kanban_main">
+								<div class="o_kanban_card_content o_visible">
+									<div class="o_kanban_primary_left">
+										<div attrs="{'invisible': [('is_final', '=', False)]}">
+											<span><i class="fa fa-thumbs-up"></i></span>
+										</div>
+										<div class="o_primary">
+											<span><t t-esc="record.name.value"/></span>
+										</div>
+										<div t-if="widget.editable" class="o_crm_kanban_colorpicker">
+											<ul class="oe_kanban_colorpicker" data-field="color"/>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</t>
+				</templates>
+			</kanban>
+		</field>
+	</record>	
+	
+	<record model="ir.ui.view" id="deliverables_stage_tree_view">
+		<field name="name">deliverables.stage.tree</field>
+		<field name="model">project.task.deliverables.stage</field>
+		<field name="arch" type="xml">
+			<tree string="Deliverable stages" editable="bottom" decoration-danger="is_final">
+				<button name="final_on_off" string="On/Off" type="object" class="btn-primary" icon="fa-power-off"/>
+				<field name="name"/>
+				<field name="is_final" readonly="1"/>
+			</tree>
+		</field>
+	</record>
+
+	<record id="deliverables_stage_form_view" model="ir.ui.view">
+		<field name="name">deliverables.stage.form</field>
+		<field name="model">project.task.deliverables.stage</field>
+		<field name="arch" type="xml">
+			<form string="Deliverable Stages">
+				<header>
+					<button name="final_on_off" string="On/Off" type="object" class="btn-primary" icon="fa-power-off"/>
+				</header>
+				<sheet>
+					<group>
+						<field name="name" />
+						<field name="is_final" readonly="1"/>
+					</group>
+				</sheet>
+			</form>
+		</field>
+	</record>	
+
+	<record model="ir.actions.act_window" id="deliverables_stage_act">
+		<field name="name">Deliverable Stages</field>
+		<field name="res_model">project.task.deliverables.stage</field>
+		<field name="view_mode">kanban,tree,form</field>
+		<field name="view_id" ref="deliverables_stage_kanban_view"/>
+		<field name="help" type="html">
+			<p class="oe_view_nocontent_create">
+				Create a new Stage.
+			</p>
+		</field>
+	</record>
+
+	<menuitem id="deliverables_stage" name="Stages" parent="deliverables_config" 
+	sequence="5" action="deliverables_stage_act" groups="project.group_project_manager"/>
+	
+
+	<!-- Server action to update deliverables project_id -->
+	<record id="action_project_update" model="ir.actions.server">
+		<field name="name">Update Project ids</field>
+		<field name="model_id" ref="s4b_project_task_deliverables.model_project_task_deliverables" />
+		<field name="state">code</field>
+		<field name="code">
+			action = model.update_project_ids()
+		</field>
+	</record>
+
+</odoo>

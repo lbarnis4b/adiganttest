@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+
+    <!-- Legacy template -->
+    <t t-name="web_widget_colorpicker.LegacyFieldColorPicker">
+        <div class="o_field_color_picker">
+            <span t-if="widget.mode === 'readonly'" t-att-style="'background-color: ' + widget.value" t-esc="widget.value"/>
+            <div t-if="widget.mode !== 'readonly'" class="input-group colorpicker-component">
+                <input type="text" class="form-control o_input" autocomplete="off" t-att-value="widget.value"/>
+                <span class="input-group-addon"><i></i></span>
+            </div>
+        </div>
+    </t>
+
+</templates>

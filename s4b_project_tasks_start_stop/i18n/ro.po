@@ -1,0 +1,254 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* s4b_project_tasks_start_stop
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 16.0-20230612\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-09 13:55+0000\n"
+"PO-Revision-Date: 2025-01-09 13:55+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model,name:s4b_project_tasks_start_stop.model_account_analytic_line
+msgid "Analytic Line"
+msgstr "Linie analitica"
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model,name:s4b_project_tasks_start_stop.model_project_task_audit
+msgid "Bogus"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__calc_effective_hours
+msgid "Calc effing hours"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__change_date
+msgid "Change date"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__create_uid
+msgid "Created by"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__create_date
+msgid "Created on"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__current_user
+msgid "Current user"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.view_task_form2_inherited
+msgid "Duration"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_account_analytic_line__chrono_date_stop
+msgid "End Time"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__id
+msgid "ID"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit____last_update
+msgid "Last Modified on"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__write_uid
+msgid "Last Updated by"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__write_date
+msgid "Last Updated on"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__name
+msgid "Name"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__new_effective_hours
+msgid "New effing hours"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__new_write_uid
+msgid "New user"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__old_effective_hours
+msgid "Old effing hours"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__old_write_uid
+msgid "Old user"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#. odoo-python
+#: code:addons/s4b_project_tasks_start_stop/models/project.py:0
+#, python-format
+msgid "Please enter work description before stopping timer."
+msgstr "Vă rog introduceți Descriere lucru înainte de a închide cronometrul."
+
+#. module: s4b_project_tasks_start_stop
+#. odoo-python
+#: code:addons/s4b_project_tasks_start_stop/models/project.py:0
+#, python-format
+msgid "Please select project before stoping the timer."
+msgstr "Vă rog selectați Proiectul înainte de a închide cronometrul."
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__project_id
+msgid "Project"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.project_task_start_stop_form_view
+msgid "Refresh timer"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.project_task_start_stop_form_view
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.view_task_kanban_inh
+msgid "Start"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__start_stop
+msgid "Start Stop"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_account_analytic_line__chrono_date_start
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__chrono_date_start
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__chrono_date_start
+msgid "Start Time"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__task_id
+msgid "Start stop Task"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.view_task_search_form
+msgid "Started Tasks"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#. odoo-python
+#: code:addons/s4b_project_tasks_start_stop/models/project.py:0
+#, python-format
+msgid "Started by %s."
+msgstr "Pornit de %s."
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__started_user
+msgid "Started user"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.project_task_start_stop_form_view
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.view_task_kanban_inh
+msgid "Stop"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__chrono_date_end
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__chrono_date_end
+msgid "Stop Time"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#. odoo-python
+#: code:addons/s4b_project_tasks_start_stop/models/project.py:0
+#, python-format
+msgid "Stopped by %s."
+msgstr "Oprit de %s."
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model,name:s4b_project_tasks_start_stop.model_project_task
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task_audit__task_id
+msgid "Task"
+msgstr "Sarcină"
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.view_task_form2_inherited
+msgid "Timesheet Activities"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model,name:s4b_project_tasks_start_stop.model_res_users
+msgid "User"
+msgstr "Utilizatori"
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.project_task_start_stop_form_view
+msgid "Users currently working"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.project_task_start_stop_form_view
+msgid "Users currently working on this task"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__start_stop_users_ids
+msgid "Users using start stop"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__running_work_description
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__running_work_description
+#: model_terms:ir.ui.view,arch_db:s4b_project_tasks_start_stop.project_task_start_stop_form_view
+msgid "Work Description"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__time_count
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__count_time
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_res_users__time_count
+msgid "Working Time"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#: model:ir.model.fields,field_description:s4b_project_tasks_start_stop.field_project_task__count_time
+msgid "Working Time Float"
+msgstr ""
+
+#. module: s4b_project_tasks_start_stop
+#. odoo-python
+#: code:addons/s4b_project_tasks_start_stop/models/project.py:0
+#, python-format
+msgid "You cannot start multiple tasks. Task %s (#%s) is already in progress."
+msgstr ""
+"Nu puteți cronometra mai multe sarcini deodată. Sarcina %s (nr. #%s) este "
+"deja pornită."
