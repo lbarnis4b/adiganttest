@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="web_gantt_native.GanttResourcePanel" owl="1">
+        <div class="gantt-resource-panel">
+            <!-- Header -->
+            <div class="gantt-resource-header">
+                <div class="gantt-resource-title">Resource Load</div>
+            </div>
+            
+            <!-- Content -->
+            <div class="gantt-resource-content">
+                <!-- Left Side: Resource List -->
+                <div class="gantt-resource-list" t-ref="resource-list" t-att-style="'width:' + state.gutterOffset + 'px;'">
+                    <div class="gantt-resource-items" t-att-style="'width:' + state.itemsOffset + 'px;'">
+                        <!-- Resource names -->
+                        <t t-if="getResourceGroups().length > 0">
+                            <t t-foreach="getResourceGroups()" t-as="resource" t-key="resource.id">
+                                <div class="gantt-resource-item" 
+                                     t-att-class="{'gantt-resource-item-issue': hasResourceIssues(resource)}"
+                                     t-on-mouseover="(ev) => this.onResourceHover(resource, ev)"
+                                     t-on-mouseout="() => this.onResourceOut()">
+                                    <t t-esc="resource.name"/>
+                                    <t t-if="hasResourceIssues(resource)">
+                                        <span class="gantt-resource-issue-indicator">⚠️</span>
+                                    </t>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <div class="gantt-resource-item-empty">
+                                No resource data available
+                            </div>
+                        </t>
+                    </div>
+                </div>
+
+                <!-- Right Side: Timeline with Vertical Lines -->
+                <div class="gantt-resource-timeline" t-ref="resource-timeline">
+                    <div class="gantt-resource-timeline-inner">
+                        <!-- Vertical grid lines using GanttTimeLineHead - только если данные валидны -->
+                        <t t-if="shouldShowTimelineHead()">
+                            <GanttTimeLineHead scales="getSafeScales()" options="props.options" parent="props.parent"/>
+                        </t>
+                        
+                        <!-- Resource bars -->
+                        <t t-if="getResourceGroups().length > 0">
+                            <t t-foreach="getResourceGroups()" t-as="resource" t-key="resource.id">
+                                <div class="gantt-resource-row">
+                                    <t t-foreach="resource.tasks" t-as="task" t-key="resource.id + '_' + task.task_id[0]">
+                                        <t t-set="position" t-value="calculateTaskPosition(task)"/>
+                                        <div class="gantt-resource-bar" 
+                                             t-att-class="{'gantt-resource-bar-issue': task.has_issues}"
+                                             t-att-style="'left: ' + position.left + 'px; width: ' + position.width + 'px;'"
+                                             t-on-mouseover="(ev) => this.onTaskHover(task, ev)"
+                                             t-on-mouseout="() => this.onTaskOut()">
+                                            <t t-esc="task.task_id[1] || 'Task ' + task.task_id[0]"/>
+                                        </div>
+                                    </t>
+                                </div>
+                            </t>
+                        </t>
+                        <t t-else="">
+                            <div class="gantt-resource-row-empty">
+                                No resource data available
+                            </div>
+                        </t>
+                    </div>
+                </div>
+                
+
+            </div>
+            
+            <!-- Resource Panel Hint Component -->
+            <ResourcePanelHint/>
+        </div>
+    </t>
+
+</templates>

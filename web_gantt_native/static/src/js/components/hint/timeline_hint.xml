@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="native_gantt.TimeLinePopupHint" owl="1">
+        <div class="task-gantt-line-hint-move"
+             t-att-style="'left:' + state.left + 'px; top:' + state.top + 'px;'"
+             t-att-class="{'o_hidden': !state.isVisible}">
+
+            <t t-foreach="state.itemValue" t-as="item" t-key="item.key">
+                <t t-if="item.key !== ''">
+                    <li><t t-esc="item.key"/>: <t t-esc="item.value"/></li>
+                </t>
+                <t t-else="">
+                    <t t-esc="item.value"/>
+                </t>
+            </t>
+
+        </div>
+	</t>
+</templates>
+
+
+

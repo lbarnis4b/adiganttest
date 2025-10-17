@@ -15,7 +15,7 @@
 	padding-top: 0px;
     padding-right: 5px;
     padding-bottom: 0px;
-    padding-left: 5px;
+    padding-left: 1px;
   color: #666666;
 }
 
@@ -56,7 +56,7 @@
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
-    width: calc(100% - 50px);
+    width: calc(100% - 60px);
     display: inline-block;
 
 }
@@ -127,12 +127,13 @@
 .ztree li span {
   line-height: 24px;
   margin-right: 2px;
+  margin-left: 2px;
   background-color: transparent;
 }
 
 .ztree li span.button {
   line-height: 0;
-  margin: 0;
+  margin-left: 2px;
   padding: 0 0px;
   width: 15px;
   height: 30px;
@@ -437,4 +438,57 @@ ul.ztree.zTreeDragUL {
   opacity: 0.0;
   filter: alpha(opacity=0);
   position: absolute;
+}
+
+
+/* Style for line in zTree */
+.ztree li {
+    position: relative;
+    padding-left: 17px;
+}
+
+.ztree li::before, .ztree li::after {
+    content: '';
+    position: absolute;
+    left: 0;
+}
+
+.ztree li::before {
+    border-left: 1px solid rgba(153, 50, 164, 0.15);
+    height: 100%;
+    top: -5px;
+}
+
+.ztree li::after {
+    border-top: 1px solid rgba(153, 50, 164, 0.15);
+    width: 12px;
+    top: 15px;
+}
+
+.ztree li:last-child::before {
+    height: 20px;
+}
+
+.ztree li ul {
+    padding-left: 4px;
+}
+
+.ztree > li::before, .ztree > li::after {
+    display: none;
+}
+
+.ztree li span.button.switch {
+    position: relative;
+    z-index: 2;
+}
+
+.ztree li span.button.roots_open::before,
+.ztree li span.button.roots_close::before,
+.ztree li span.button.center_open::before,
+.ztree li span.button.center_close::before,
+.ztree li span.button.bottom_open::before,
+.ztree li span.button.bottom_close::before {
+    background-color: white;
+    position: relative;
+    z-index: 2;
 }

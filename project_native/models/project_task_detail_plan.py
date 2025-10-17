@@ -1,21 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 import logging
-from lxml import etree
-
-import datetime
-from dateutil import tz
-import pytz
-import time
-from string import Template
-from datetime import datetime, timedelta
-from odoo.exceptions import Warning
-from pdb import set_trace as bp
-
-from itertools import groupby
-from operator import itemgetter
-
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)  # Need for message in console.
 

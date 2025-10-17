@@ -1,24 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 import logging
-from lxml import etree
-
-import datetime
-from dateutil import tz
-import pytz
-import time
-from string import Template
-from datetime import datetime, timedelta
-from odoo.exceptions import  Warning
-from pdb import set_trace as bp
-
-from itertools import groupby
-from operator import itemgetter
-
-from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)  # Need for message in console.
-
 
 
 class ProjectTaskNativeResource(models.Model):
@@ -55,6 +39,9 @@ class ProjectTaskResourceLink(models.Model):
     duration = fields.Integer(related='task_id.native_duration', string='Duration',  store=True, readonly=True,)
     project_id = fields.Many2one(related='task_id.project_id', string='Project', store=True, readonly=True,)
     active_task = fields.Boolean(related='task_id.active', string="Archived", store=True, readonly=True, )
+    
+    # Calendar integration - restored from v17
+    calendar_id = fields.Many2one(related='resource_id.calendar_id', string='Calendar', store=True, readonly=True,)
 
     # load_control = fields.Boolean(name="Load Control", help="Allow Resource Load Control", default=True)
     load_control = fields.Selection('_get_load_control',
@@ -83,10 +70,12 @@ class ProjectTaskResourceLink(models.Model):
 
         result = super(ProjectTaskResourceLink, self).write(vals)
         if result:
-            info_name = "res_{}".format(self.id)
-            info_task = self.env['project.task.info'].sudo().search([('name', '=', info_name)])
-            if info_task.id:
-                info_task.sudo().write({"end": self.resource_id.name})
+            # Обрабатываем каждую запись в recordset
+            for record in self:
+                info_name = "res_{}".format(record.id)
+                info_task = self.env['project.task.info'].sudo().search([('name', '=', info_name)])
+                if info_task:
+                    info_task.sudo().write({"end": record.resource_id.name})
 
         return result
 
@@ -104,20 +93,21 @@ class ProjectTaskResourceLink(models.Model):
     @api.model_create_multi
     def create(self, vals):
 
-        new_id = super(ProjectTaskResourceLink, self).create(vals)
+        new_records = super(ProjectTaskResourceLink, self).create(vals)
 
-        if new_id:
-            info_name = "res_{}".format(new_id.id)
+        # Обрабатываем каждую созданную запись
+        for new_record in new_records:
+            info_name = "res_{}".format(new_record.id)
             value = {}
             value["name"] = info_name
-            value["end"] = new_id.resource_id.name
+            value["end"] = new_record.resource_id.name
             value["show"] = True
 
             vals = {}
             vals["info_ids"] = [(0, 0, value)]
-            new_id.task_id.write(vals)
+            new_record.task_id.write(vals)
 
-        return new_id
+        return new_records
 
 
 

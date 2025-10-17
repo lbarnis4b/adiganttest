@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="native_gantt.TimelineHead" owl="1">
+
+
+        <t t-ref="el">
+            <div t-att-class="'task-gantt-timeline-head ' + (props.cssClass || '')">
+                <div t-att-class="'task-gantt-scale-secondary ' + (props.cssClass || '')">
+                
+             
+        <!--            <t t-set="debug" t-value="debugXML(state.second_scale)"/>-->
+                    
+                    <t t-if="state.time_type === 'month_day'" t-foreach="state.second_scale" t-as="date" t-key="date_index">
+        <!--                 <t t-set="debug" t-value="debugXML(date)"/>-->
+                        <div class="task-gantt-bottom-column"
+                             t-att-class="{'task-gantt-weekend-column': isWeekend(date), 'task-gantt-today-column': isToday(date)}"
+                             t-att-style="'width: ' + state.time_scale + 'px; margin-top: -52px;'">
+                             <span t-esc="toFormat(date, state.format)"/>
+                        </div>
+                    </t>
+                    
+                    
+                    <t t-if="dayHourTypes.includes(state.time_type)" t-foreach="state.second_scale" t-as="range_date" t-key="range_date_index">
+                            <t t-foreach="state.second_scale[range_date]" t-as="hour" t-key="range_date_index + '_' + hour_index">
+                                <div class="task-gantt-bottom-column"
+                                    t-att-class="{'task-gantt-weekend-column': isWeekend(hour), 'task-gantt-today-column': isToday(hour)}"
+                                    t-att-style="'width: ' + state.time_scale + 'px; margin-top: -52px;'">
+                                    
+                                </div>
+                            </t>
+                    </t>
+                    
+                    <t t-if="YearMontTypes.includes(state.time_type)" t-foreach="state.second_scale" t-as="range_date" t-key="range_date_index + '_year'">
+                            <t t-foreach="state.second_scale[range_date]" t-as="month" t-key="range_date_index + '_month_' + month_index">
+                                <div class="task-gantt-bottom-column"
+                                    t-att-class="{'task-gantt-today-column': isMonth(month)}"
+                                    t-att-style="'width: ' + state.time_scale + 'px; margin-top: -52px;'">
+                                    
+                                </div>
+                            </t>
+                    </t>
+                                
+                    <t t-if="WeekMontTypes.includes(state.time_type)" t-foreach="state.second_scale" t-as="range_date" t-key="range_date_index + '_week'">
+                           
+                            <t t-foreach="state.second_scale[range_date]" t-as="week" t-key="range_date_index + '_week_' + week_index">
+                                <div class="task-gantt-bottom-column"
+                                    t-att-class="{'task-gantt-today-column': isWeek(week)}"
+                                    t-att-style="'width: ' + state.time_scale + 'px; margin-top: -52px;'">
+                              
+                                </div>
+                            </t>
+                    </t>
+                    
+                   <t t-if="QuarterMontTypes.includes(state.time_type)" t-foreach="state.second_scale" t-as="range_date" t-key="range_date_index + '_quarter'">
+                           
+                            <t t-foreach="state.second_scale[range_date]" t-as="quarter" t-key="range_date_index + '_quarter_' + quarter_index">
+                                <div class="task-gantt-bottom-column"
+                                    t-att-class="{'task-gantt-today-column': isQuarter(week)}"
+                                    t-att-style="'width: ' + state.time_scale + 'px; margin-top: -52px;'">
+                              
+                                </div>
+                            </t>
+                    </t>
+                    
+                    
+                    
+                </div>
+            </div>
+        </t>
+        
+
+
+
+	</t>
+</templates>

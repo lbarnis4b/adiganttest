@@ -2,8 +2,6 @@
 <openerp>
     <data>
 
-
-
         <record id="view_project_ganttaps" model="ir.ui.view">
             <field name="name">project.project.ganttaps</field>
             <field name="model">project.project</field>
@@ -43,7 +41,6 @@
         <record id="project.open_view_project_all_group_stage" model="ir.actions.act_window">
             <field name="view_mode">kanban,tree,form,calendar,activity,ganttaps</field>
         </record>
-
 
 
     </data>

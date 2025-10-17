@@ -1,20 +1,10 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-import logging
-from lxml import etree
 
-import datetime
-from dateutil import tz
 import pytz
-import time
-from string import Template
 from datetime import datetime, timedelta
-from odoo.exceptions import Warning
-from pdb import set_trace as bp
 
-from itertools import groupby
-from operator import itemgetter
-
+import logging
 from odoo.exceptions import UserError
 
 _logger = logging.getLogger(__name__)  # Need for message in console.
@@ -22,6 +12,14 @@ _logger = logging.getLogger(__name__)  # Need for message in console.
 
 class Project(models.Model):
     _inherit = "project.project"
+
+
+    def _compute_duration_tracking(self):
+        for rec in self:
+            try:
+                super(Project, rec)._compute_duration_tracking()
+            except ValueError:
+                rec.duration_tracking = 0
 
     @api.model
     def _tz_get(self):
@@ -46,10 +44,22 @@ class Project(models.Model):
         return value
 
     use_calendar = fields.Boolean(name="Use Calendar",help="Set Calendat in Setting Tab", default=True)
+    show_wbs = fields.Boolean(name="Show WBS Column", help="Display WBS codes in Gantt view", default=False)
 
     resource_calendar_id = fields.Many2one(
         'resource.calendar', string='Working Time',
-        related='company_id.resource_calendar_id', readonly=False)
+        compute=False, readonly=False, store=True)
+    
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # If use_calendar=False, don't set calendar
+            if not vals.get('use_calendar', True):
+                vals['resource_calendar_id'] = False
+            # If use_calendar=True and no calendar specified, use company calendar
+            elif vals.get('use_calendar', True) and 'resource_calendar_id' not in vals:
+                vals['resource_calendar_id'] = self.env.user.company_id.resource_calendar_id.id
+        return super().create(vals_list)
 
     scheduling_type = fields.Selection('_get_scheduling_type',
                                        string='Scheduling Type',
@@ -80,10 +90,15 @@ class Project(models.Model):
 
     tz = fields.Selection(_tz_get, string='Timezone', default=lambda self: self._context.get('tz'),
                           help="Time Zone")
-    tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset', invisible=True)
+    tz_offset = fields.Char(compute='_compute_tz_offset', string='Timezone offset')
 
+    # Critical Path fields for project  
     cp_shows = fields.Boolean(name="Critical Path Shows", help="Critical Path Shows", default=True)
     cp_detail = fields.Boolean(name="Critical Path Detail", help="Critical Path Shows Detail on Gantt", default=False)
+    critical_path_count = fields.Integer(string='Critical Path Tasks Count', default=0)
+    critical_path_duration = fields.Integer(string='Critical Path Duration', default=0) 
+
+    critical_path_summary = fields.Text(string='Critical Path Summary', default="No critical path calculated yet")
 
 
 
@@ -91,6 +106,38 @@ class Project(models.Model):
     def _compute_tz_offset(self):
         for project in self:
             project.tz_offset = datetime.now(pytz.timezone(project.tz or 'GMT')).strftime('%z')
+
+    @api.depends('task_ids')
+    def _compute_critical_path_count(self):
+        for project in self:
+            # Count tasks that are on the critical path
+            # Use safe check in case critical_path field is not yet loaded
+            critical_tasks = project.task_ids.filtered(lambda t: hasattr(t, 'critical_path') and t.critical_path)
+            project.critical_path_count = len(critical_tasks)
+
+    @api.depends('task_ids')
+    def _compute_critical_path_duration(self):
+        for project in self:
+            # Calculate total duration of critical path tasks
+            # Use safe check in case critical_path field is not yet loaded
+            critical_tasks = project.task_ids.filtered(lambda t: hasattr(t, 'critical_path') and t.critical_path)
+            total_duration = sum(critical_tasks.mapped('plan_duration'))
+            project.critical_path_duration = total_duration
+
+    @api.depends('task_ids')
+    def _compute_critical_path_summary(self):
+        for project in self:
+            # Generate summary text of critical path tasks
+            # Use safe check in case critical_path field is not yet loaded
+            critical_tasks = project.task_ids.filtered(lambda t: hasattr(t, 'critical_path') and t.critical_path)
+            if critical_tasks:
+                task_names = critical_tasks.mapped('name')[:5]  # Limit to first 5 tasks
+                summary = "Critical path tasks: " + ", ".join(task_names)
+                if len(critical_tasks) > 5:
+                    summary += f" ... and {len(critical_tasks) - 5} more"
+                project.critical_path_summary = summary
+            else:
+                project.critical_path_summary = "No critical path calculated yet"
 
     @api.depends("task_default_start", "task_default_duration")
     def _compute_default_start_end(self):
@@ -306,6 +353,18 @@ class ProjectTaskNative(models.Model):
     duration_picker = fields.Selection(string='Duration Picker', related="project_id.duration_picker", readonly=True,)
     duration_work_scale = fields.Char(string='Duration Work Scale', related="project_id.duration_work_scale", readonly=True, )
 
+    # WBS fields
+    wbs_code = fields.Char(string='WBS Code', compute='_compute_wbs_code', store=True, 
+                          help="Work Breakdown Structure code")
+    wbs_level = fields.Integer(string='WBS Level', compute='_compute_wbs_level', store=True,
+                              help="WBS hierarchy level")
+    wbs_sequence = fields.Integer(string='WBS Sequence', default=0,
+                                 help="Sequence within WBS level")
+
+    # Critical path field (used by GUI)
+    critical_path = fields.Boolean(string="Critical Path", default=False, readonly=True,
+                                  help="Task is on the critical path (zero float)")
+
 
     def update_date_end(self, stage_id):
         #Disable remove (end date) when stage change,
@@ -415,56 +474,179 @@ class ProjectTaskNative(models.Model):
             raise UserError(_(
                 'Not work in manual mode. Please set in project: Backwork or Forward'))
 
+        # Check for cycles before scheduling
+        cycle_result = self.check_project_cycles(project_id)
+        if cycle_result['has_cycles']:
+            cycle_tasks = cycle_result['cycle_tasks']
+            task_names = []
+            for task_id in cycle_tasks:
+                task = self.browse(task_id)
+                if task.exists():
+                    task_names.append(task.name)
+            
+            raise UserError(_(
+                'Circular dependencies detected in project tasks. '
+                'The following tasks are involved in circular dependencies: %s. '
+                'Please review and fix the task dependencies before scheduling.'
+            ) % ', '.join(task_names))
+
         # project_task_scheduler.py
-        self._scheduler_plan_start_calc(project=search_project)
+        tasks_ap = self._scheduler_plan_start_calc(project=search_project)
 
         # self.do_sorting(project_id=project_id)
 
         self._summary_work(project_id=project_id)
         self._scheduler_plan_complite(project_id=project_id, scheduling_type=scheduling_type)
 
+        # CRITICAL PATH CALCULATION - moved here from Phase 10 to work with calendar
+        # Calculate critical path after all scheduling is complete
+        try:
+            #_logger.info("🎯 Calculating critical path after scheduling completion...")
+            self._calculate_project_critical_path(project_id, tasks_ap)
+        except Exception as e:
+            _logger.error(f"Critical path calculation failed: {e}")
+            # Don't fail the whole scheduling process
+
         return True
 
+    def _calculate_project_critical_path(self, project_id, tasks_ap):
+        """
+        Calculate critical path for project after scheduling is complete
+        This method uses the scheduler's internal tasks_ap data with late dates
+        
+        Args:
+            project_id: ID of the project
+            tasks_ap: Task scheduling data from the scheduler with calculated late dates
+        """
+        #_logger.info(f"🎯 Starting critical path calculation for project {project_id}")
+        
+        if not tasks_ap:
+            #_logger.error("❌ No scheduler data provided for critical path calculation")
+            return 0
+        
+       #_logger.info(f"🎯 Using scheduler data with {len(tasks_ap)} tasks")
+        
+        # DEBUG: Analyze scheduler data before critical path calculation
+        #_logger.info("🔍 ANALYZING SCHEDULER DATA:")
+        #for i, task_data in enumerate(tasks_ap[:5]):  # Show first 5 tasks
+            # task_name = task_data.get('name', 'Unknown')
+            # soon_start = task_data.get('soon_date_start')
+            # soon_end = task_data.get('soon_date_end') 
+            # late_start = task_data.get('late_date_start')
+            # late_end = task_data.get('late_date_end')
+            
+            # if late_start and soon_start:
+            #     start_float = (late_start - soon_start).total_seconds() / 3600
+            #     _logger.info(f"  📋 Task {i+1}: {task_name}")
+            #     _logger.info(f"    Soon: {soon_start} → {soon_end}")
+            #     _logger.info(f"    Late: {late_start} → {late_end}")
+            #     _logger.info(f"    Float: {start_float:.2f}h")
+            # else:
+            #     _logger.info(f"  📋 Task {i+1}: {task_name} - Missing late dates")
+        
+        # Use the critical path module with proper scheduler data
+        critical_count = self.mark_critical_path_from_scheduler(tasks_ap, project_id)
+        #_logger.info(f"✅ Critical path calculation completed: {critical_count} tasks marked as critical")
+        
+        return critical_count
 
     def _scheduler_plan_complite(self, project_id, scheduling_type):
 
         # Calculate data start/stop for project.
+        #_logger.info(f"📅 _scheduler_plan_complite called for project_id={project_id}, scheduling_type={scheduling_type}")
 
         search_tasks = self.env['project.task'].sudo().search([('project_id', '=', project_id)])
+        #_logger.info(f"📅 Found {len(search_tasks)} tasks in project {project_id}")
+
+        # Reset plan_action flag for all tasks
+        for task in search_tasks:
+            var_data = {}
+            var_data['plan_action'] = False
+            task.sudo().write(var_data)
 
         if scheduling_type == "forward":
+            # FORWARD SCHEDULING: Update only END date (result), preserve START date (input parameter)
+            
             date_list_end = []
+            leaf_task_dates = []
+            
             for task in search_tasks:
-                var_data = {}
-                var_data['plan_action'] = False
-                task.sudo().write(var_data)
-
                 if task.date_end:
-                    # date_list_end.append(fields.Datetime.from_string(task.date_end))
                     date_list_end.append(task.date_end)
-
-            if date_list_end:
-                new_prj_date_end = max(date_list_end)
-                self.env['project.project'].sudo().browse(int(project_id)).write({
+                    
+                    # Calculate successor count by checking if this task is a parent in any predecessor relationship
+                    successor_count = self.env['project.task.predecessor'].search_count([
+                        ('parent_task_id', '=', task.id)
+                    ])
+                    
+                    # Debug logging for task dates
+                    #_logger.info(f"   📋 Task: {task.name} - date_end: {task.date_end}, successor_count: {successor_count}")
+                    
+                    # Collect leaf task dates (tasks with no successors - end of project)
+                    # CRITICAL FIX: Exclude isolated ALAP tasks from project end calculation
+                    if successor_count == 0:
+                        if task.constrain_type == 'alap':
+                            # Skip isolated ALAP tasks from project end calculation
+                            pass
+                            #_logger.info(f"   🔄 Skipping isolated ALAP task from project end calc: {task.name}")
+                        else:
+                            leaf_task_dates.append(task.date_end)
+                            #_logger.info(f"   🍃 Leaf task found: {task.name} - {task.date_end}")
+            
+            # Use leaf task dates if available, otherwise fall back to all tasks
+            if leaf_task_dates:
+                new_prj_date_end = max(leaf_task_dates)
+                #_logger.info(f"📅 Forward: Using leaf task date for project end: {new_prj_date_end} (from {len(leaf_task_dates)} leaf tasks)")
+            elif date_list_end:
+                # Check if all tasks are isolated ALAP tasks - if so, preserve original project end
+                all_tasks_alap = all(task.constrain_type == 'alap' for task in search_tasks if task.date_end)
+                if all_tasks_alap:
+                    project = self.env['project.project'].sudo().browse(int(project_id))
+                    if project.date_end:
+                        new_prj_date_end = project.date_end
+                        #_logger.info(f"📅 Forward: Preserving original project end for isolated ALAP tasks: {new_prj_date_end}")
+                    else:
+                        new_prj_date_end = max(date_list_end)
+                        #_logger.info(f"📅 Forward: No original project end, using latest ALAP task: {new_prj_date_end}")
+                else:
+                    new_prj_date_end = max(date_list_end)
+                    #_logger.info(f"📅 Forward: Using latest task date for project end: {new_prj_date_end} (no non-ALAP leaf tasks found)")
+            else:
+                new_prj_date_end = None
+            
+            if new_prj_date_end:
+                project = self.env['project.project'].sudo().browse(int(project_id))
+                # _logger.info(f"📅 Forward: Updating project {project.name} END date to: {new_prj_date_end}")
+                # _logger.info(f"📅 Forward: Preserving project START date: {project.date_start}")
+                project.write({
                     'date_end': new_prj_date_end,
                 })
+                #_logger.info(f"📅 Project end date updated successfully: {project.date_end}")
 
-        if scheduling_type == "backward":
+        elif scheduling_type == "backward":
+            # BACKWARD SCHEDULING: Update only START date (result), preserve END date (input parameter)
+            
             date_list_start = []
             for task in search_tasks:
-                var_data = {}
-                var_data['plan_action'] = False
-                task.sudo().write(var_data)
-
                 if task.date_start:
-                    # date_list_start.append(fields.Datetime.from_string(task.date_start))
                     date_list_start.append(task.date_start)
 
+            #_logger.info(f"📅 Backward scheduling: Found {len(date_list_start)} tasks with start dates")
             if date_list_start:
                 new_prj_date_start = min(date_list_start)
-                self.env['project.project'].sudo().browse(int(project_id)).write({
+            else:
+                new_prj_date_start = None
+            
+            if new_prj_date_start:
+                project = self.env['project.project'].sudo().browse(int(project_id))
+                # _logger.info(f"📅 Backward: Updating project {project.name} START date to: {new_prj_date_start}")
+                # _logger.info(f"📅 Backward: Preserving project END date: {project.date_end}")
+                project.write({
                     'date_start': new_prj_date_start,
                 })
+                #_logger.info(f"📅 Project start date updated successfully: {project.date_start}")
+            #else:
+                #_logger.warning("📅 No tasks with start dates found - project start date not updated")
 
 
     def _summary_work(self, project_id):
@@ -495,13 +677,31 @@ class ProjectTaskNative(models.Model):
                  "native_duration", "project_id.scheduling_type", "task_resource_ids.name")
     def _compute_plan_action(self):
         for task in self:
+
+            # If the task is in automatic mode, set plan_action = True
             if task.schedule_mode != "manual":
                 task.plan_action = True
-
+            else:
+                # More efficient search - only look for automatic tasks
+                has_auto_dependent = self.env['project.task.predecessor'].search_count([
+                    ('parent_task_id', '=', task.id),
+                    ('task_id.schedule_mode', '!=', 'manual')
+                ]) > 0
+                
+                task.plan_action = has_auto_dependent
 
     @api.depends('date_end', 'date_start')
     def _compute_native_duration(self):
         for task in self:
+
+                   
+            if task.date_end and task.date_start and task.date_start > task.date_end:
+                # Обновляем дату окончания, сохраняя продолжительность, если она известна
+                if hasattr(task, 'plan_duration') and task.plan_duration > 0:
+                    task.date_end = task.date_start + timedelta(seconds=task.plan_duration)
+                else:
+                   
+                    task.date_end = task.date_start + timedelta(days=1)
 
             if task.date_end and task.date_start:
                 diff = fields.Datetime.from_string(task.date_end) - fields.Datetime.from_string(task.date_start)
@@ -511,7 +711,119 @@ class ProjectTaskNative(models.Model):
 
             task.native_duration = native_duration
 
+    @api.depends('parent_id', 'sorting_seq', 'sequence', 'project_id')
+    def _compute_wbs_code(self):
+        for task in self:
+            task.wbs_code = task._generate_wbs_code()
 
+    @api.depends('parent_id')
+    def _compute_wbs_level(self):
+        for task in self:
+            task.wbs_level = task._calculate_wbs_level()
+
+    def _generate_wbs_code(self):
+        """Generate WBS code based on task hierarchy and position"""
+        if not self.project_id:
+            return '1'
+            
+        if self.parent_id:
+            # Get parent WBS code
+            parent_wbs = self.parent_id.wbs_code or '1'
+            
+            # Find position among siblings - use multiple sort criteria
+            siblings = self.parent_id.child_ids.sorted(lambda x: (
+                x.sorting_seq or 9999,  # If sorting_seq is 0, put at end
+                x.sequence or 9999,     # Use sequence as fallback
+                x.id                    # Final fallback
+            ))
+            try:
+                position = siblings.ids.index(self.id) + 1
+            except ValueError:
+                position = 1
+            
+            return f"{parent_wbs}.{position}"
+        else:
+            # Root task - find position among root tasks in project
+            root_tasks = self.env['project.task'].search([
+                ('project_id', '=', self.project_id.id),
+                ('parent_id', '=', False)
+            ]).sorted(lambda x: (
+                x.sorting_seq or 9999,  # If sorting_seq is 0, put at end  
+                x.sequence or 9999,     # Use sequence as fallback
+                x.id                    # Final fallback
+            ))
+            
+            try:
+                position = root_tasks.ids.index(self.id) + 1
+            except ValueError:
+                position = 1
+                
+            return str(position)
+
+    def _calculate_wbs_level(self):
+        """Calculate WBS level (depth in hierarchy)"""
+        level = 0
+        current = self
+        while current.parent_id:
+            level += 1
+            current = current.parent_id
+            if level > 10:  # Prevent infinite loops
+                break
+        return level
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Override create to recalculate WBS codes after task creation"""
+        tasks = super().create(vals_list)
+        
+        # Recalculate WBS codes for affected projects
+        projects = tasks.mapped('project_id')
+        for project in projects:
+            if project:
+                project_tasks = self.search([('project_id', '=', project.id)])
+                project_tasks._compute_wbs_code()
+        
+        return tasks
+
+    def write(self, vals):
+        """Override write to recalculate WBS codes when hierarchy changes"""
+        result = super().write(vals)
+        
+        # If parent_id, project_id, sorting_seq or sequence changed, recalculate WBS
+        if any(field in vals for field in ['parent_id', 'project_id', 'sorting_seq', 'sequence']):
+            projects = self.mapped('project_id')
+            for project in projects:
+                if project:
+                    project_tasks = self.search([('project_id', '=', project.id)])
+                    project_tasks._compute_wbs_code()
+        
+        return result
+
+    @api.model 
+    def init_wbs_codes(self, project_id=None):
+        """Manual method to initialize WBS codes for a project"""
+        if project_id:
+            domain = [('project_id', '=', project_id)]
+        else:
+            domain = []
+            
+        tasks = self.search(domain)
+        
+        # First ensure sorting_seq is set based on sequence if needed
+        for task in tasks.filtered(lambda t: not t.sorting_seq):
+            if task.sequence:
+                task.sorting_seq = task.sequence
+            elif not task.parent_id:
+                # Root tasks without sorting_seq - set based on creation order
+                root_tasks = self.search([
+                    ('project_id', '=', task.project_id.id),
+                    ('parent_id', '=', False)
+                ]).sorted('id')
+                task.sorting_seq = root_tasks.ids.index(task.id) + 1
+        
+        # Now recalculate WBS codes
+        tasks._compute_wbs_code()
+        return True
 
     def unlink(self):
 

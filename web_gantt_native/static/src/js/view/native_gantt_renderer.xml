@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+
+    <t t-name="native_gantt.renderer" owl="1">
+
+        <div class="gantt-container" t-ref="gantt_container">
+
+            <!--Fixed Header -->
+            <div class="timeline-gantt-fixed-header" >
+
+<!--                 <div class="TEST"> Possible use for future some functionality-->
+<!--                     <t t-esc="state.model.number.type"/>-->
+<!--                     <GanttMenuButton parent="this"/>-->
+<!--                 </div>-->
+
+                <GanttTimeLineScroll scales="state.scales" options="state.options"/>
+                <div class="timeline-gantt-header">
+                    <!--Left Side -->
+                    <div class="timeline-gantt-items" t-ref="timelineGanttItems" t-att-style="'width:'+state.gutterOffset+'px;'">
+                        <div class="timeline-gantt-options">
+                            <GanttItemOption options="state.options" parent="this"/>
+                            <GanttItemMenu options="state.options" scales="state.scales" parent="props.controller"/>
+                        </div>
+                    </div>
+                    <!--Right Side -->
+                    <GanttTimeLineHeader scales="state.scales" options="state.options"/>
+                </div>
+            </div>
+
+            <!--Scrollable Content Container -->
+            <div class="gantt-scrollable-content">
+                <!--Middle -->
+                <div class="task-gantt" t-ref="taskGantt">
+                <!--Left Side -->
+                <div t-ref="taskGanttList" class="task-gantt-list" t-att-style="'width:'+state.gutterOffset+'px;'">
+                    <!--Action -->
+                    <div class="task-gantt-action">
+                        <GanttItemAction item_list_z="state_z.item_list_z"/>
+                    </div>
+                    <!--WBS Column -->
+                    <GanttWbsColumn item_list_z="state_z.item_list_z" options="state.options" parent="this"/>
+                    <!--Ztree -->
+                    <div t-ref="taskGanttItems" class="task-gantt-items" t-att-style="'width:'+state.itemsOffset+'px;'">
+                        <GanttItemzTree item_list="state.item_list" options="state.options"/>
+                    </div>
+                    <div class="task-gantt-items-gutter"></div>
+                    <div class="task-gantt-info">
+                        <GanttListInfo options="state.options" parent="this" item_list_z="state_z.item_list_z"/>
+                    </div>
+                    <div class="task-gantt-gutter"></div>
+                </div>
+                <!--Right Side -->
+                <div class="task-gantt-timeline" t-ref="task-gantt-timeline">
+                    <div class="task-gantt-timeline-inner">
+                        <!--Fake Header for gantt bar timeline -->
+                        <GanttTimeLineHead scales="state.scales" options="state.options" parent="this"/>
+                        <div class="task-gantt-timeline-data" t-ref="task-gantt-timeline-data">
+                            <GanttTimeLineData item_list="state_z.item_list_z"
+                                               options="state.options"
+                                               scales="state.scales" parent="this"/>
+                        </div>
+                        <div class="task-gantt-pointer"></div>
+                        <div class="task-gantt-timeline-arrow">
+                            <GanttTimeLineArrow item_list="state_z.item_list_z"
+                                                options="state.options"
+                                                scales="state.scales" parent="this"/>
+                        </div>
+
+                    </div>
+
+
+                    <div class="task-gantt-line-hints"></div>
+                    <div t-ref="task-gantt-line-tips" class="task-gantt-line-tips">
+                        <TimeLinePopupHint t-on-show-hint="showHint" t-on-hide-hint="hideHint"/>
+                    </div>
+                </div>
+
+            </div>
+
+                <!--Bottom: Resource Load Panel -->
+                <t t-if="state.showResourceLoad">
+                    <GanttResourcePanel 
+                        tasks="state.item_list"
+                        scales="state.scales"
+                        options="state.options"
+                        gutterOffset="state.gutterOffset"
+                        itemsOffset="state.itemsOffset"
+                        resourceData="state.resourceData"
+                        parent="this"
+                    />
+                </t>
+            </div> <!-- End .gantt-scrollable-content -->
+
+        </div>
+    </t>
+
+</templates>

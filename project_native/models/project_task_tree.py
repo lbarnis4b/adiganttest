@@ -1,7 +1,5 @@
 from odoo import models, fields, api, _
 import logging
-
-
 _logger = logging.getLogger(__name__)  # Need for message in console.
 
 
@@ -47,6 +45,17 @@ class ProjectTaskNative(models.Model):
 
                 task_obj_search = self.sudo().search([('id', '=', int(id))])
                 task_obj_search.sudo().write(var_data)
+
+        # Recalculate WBS codes after hierarchy changes
+        if id_update:
+            updated_task = self.sudo().search([('id', '=', int(id_update))])
+            if updated_task.project_id:
+                # Get all tasks in the project and recalculate WBS codes
+                project_tasks = self.sudo().search([
+                    ('project_id', '=', updated_task.project_id.id)
+                ])
+                # Force recomputation of WBS codes
+                project_tasks._compute_wbs_code()
 
         return True
 

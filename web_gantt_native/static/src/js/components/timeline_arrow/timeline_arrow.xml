@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="native_gantt.GanttTimeLineArrow" owl="1">
+
+         <div id="gantt_draw_timeline_link" class="task-gantt-timeline-arrow-canvas"
+              t-att-style="'width:' + state.canvas_width + 'px; height:' + state.canvas_height + 'px'">
+
+            <t t-foreach="state.predecessors" t-as="predecessor" t-key="predecessor.id">
+                <TimelineArrowDraw t-props="{predecessor: predecessor}" />
+            </t>
+
+         </div>
+
+
+
+	</t>
+</templates>
+
+
+

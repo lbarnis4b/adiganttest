@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="template" xml:space="preserve">
+    <t t-name="native_gantt.TimelineHeader" owl="1">
+
+
+        <div t-if="MonthDayTypes.includes(scales.time_type)" class="timeline-gantt-head" t-ref="el">
+            <div class="timeline-gantt-scale-primary">
+                <t t-foreach="state.first_scale" t-as="month" t-key="month.uniqueProperty">
+                    <span class="task-gantt-top-column" t-att-style="'width: ' + (state.time_scale * month.days) + 'px;'">
+                        <span class="task-gantt-scale-month-text"><t t-esc="month.year"/> - <t t-esc="month.month"/></span>
+                    </span>
+                </t>
+            </div>
+
+            <div class="timeline-gantt-scale-secondary">
+                <t t-foreach="state.second_scale" t-as="day" t-key="day.uniqueProperty">
+                    <span t-att-class="{
+                            'task-gantt-bottom-column': true,
+                            'task-gantt-weekend-column': isWeekend(day),
+                            'task-gantt-today-column': isToday(day)}"
+                          t-on-mouseover="(ev) => this.onMouseOver(toFormat(day, 'dd LLL dd (yy)'), ev)"
+                          t-on-mouseout="onMouseOut"
+                          t-att-style="'width: ' + state.time_scale + 'px;'">
+                        <t t-esc="toFormat(day, 'd')"/>
+                    </span>
+                </t>
+            </div>
+
+        </div>
+
+
+        <div t-if="dayHourTypes.includes(scales.time_type)" class="timeline-gantt-head" t-ref="el">
+            <div class="timeline-gantt-scale-primary">
+
+                <t t-foreach="scales.first_scale" t-as="range_date" t-key="range_date">
+                    <span class="task-gantt-top-column" t-att-style="'width: ' + scales.time_scale * scales.first_scale[range_date].length + 'px;'">
+                        <span class="task-gantt-scale-month-text">
+                            <t t-esc="formattedDate(range_date)"/>
+                        </span>
+                    </span>
+                </t>
+
+            </div>
+
+            <div class="timeline-gantt-scale-secondary">
+                <t t-foreach="scales.second_scale" t-as="range_date" t-key="range_date">
+                    <t t-foreach="scales.second_scale[range_date]" t-as="hour" t-key="range_date+hour">
+                        <span class="task-gantt-bottom-column" t-att-class="{'task-gantt-weekend-column': isWeekend(hour), 'task-gantt-today-column': isToday(hour)}" t-att-style="'width: ' + scales.time_scale + 'px;'">
+                            <t t-esc="toFormat(hour, 'HH:mm')"/>
+                        </span>
+                    </t>
+                </t>
+            </div>
+        </div>
+
+
+        <div t-if="YearMontTypes.includes(scales.time_type)" class="timeline-gantt-head" t-ref="el">
+
+            <div class="timeline-gantt-scale-primary">
+
+                <t t-foreach="scales.first_scale" t-as="range_date" t-key="range_date">
+                    <span class="task-gantt-top-column" t-att-style="'width: ' + scales.time_scale * scales.first_scale[range_date].length + 'px;'">
+                        <span class="task-gantt-scale-month-text">
+                            <t t-esc="range_date"/>
+                        </span>
+                    </span>
+                </t>
+
+            </div>
+
+            <div class="timeline-gantt-scale-secondary">
+                <t t-foreach="scales.second_scale" t-as="range_date" t-key="range_date">
+                    <t t-foreach="scales.second_scale[range_date]" t-as="month" t-key="range_date+month">
+                        <span class="task-gantt-bottom-column" t-att-class="{'task-gantt-today-column': isMonth(month)}" t-att-style="'width: ' + scales.time_scale + 'px;'">
+                            <t t-esc="toFormat(month, 'MMM')"/>
+                        </span>
+                    </t>
+                </t>
+            </div>
+
+        </div>
+
+        <div t-if="WeekMontTypes.includes(scales.time_type)" class="timeline-gantt-head" t-ref="el">
+
+            <div class="timeline-gantt-scale-primary">
+
+                <t t-foreach="scales.first_scale" t-as="range_date" t-key="range_date">
+                    <span class="task-gantt-top-column" t-att-style="'width: ' + scales.time_scale * scales.first_scale[range_date].length + 'px;'">
+                        <span class="task-gantt-scale-month-text">
+                            <t t-esc="range_date"/>
+                        </span>
+                    </span>
+                </t>
+
+            </div>
+
+            <div class="timeline-gantt-scale-secondary">
+                <t t-foreach="scales.second_scale" t-as="range_date" t-key="range_date">
+                    <t t-foreach="scales.second_scale[range_date]" t-as="week" t-key="range_date+week">
+                        <span class="task-gantt-bottom-column" t-att-class="{'task-gantt-today-column': isWeek(week)}" t-att-style="'width: ' + scales.time_scale + 'px;'">
+                            <t t-if="state.weekType === 'isoweek'">
+                                <t t-esc="toFormat(week, 'W')"/>
+                            </t>
+                            <t t-else="">
+                                <t t-esc="toFormat(week, 'WW')"/>
+                            </t>
+                        </span>
+                    </t>
+                </t>
+            </div>
+
+        </div>
+
+        <div t-if="QuarterMontTypes.includes(scales.time_type)" class="timeline-gantt-head" t-ref="el">
+
+            <div class="timeline-gantt-scale-primary">
+
+                <t t-foreach="scales.first_scale" t-as="range_date" t-key="range_date">
+                    <span class="task-gantt-top-column" t-att-style="'width: ' + scales.time_scale * scales.first_scale[range_date].length + 'px;'">
+                        <span class="task-gantt-scale-month-text">
+                            <t t-esc="range_date"/>
+                        </span>
+                    </span>
+                </t>
+
+            </div>
+
+            <div class="timeline-gantt-scale-secondary">
+                <t t-foreach="scales.second_scale" t-as="range_date" t-key="range_date">
+                    <t t-foreach="scales.second_scale[range_date]" t-as="quarter" t-key="range_date+quarter">
+                        <span class="task-gantt-bottom-column" t-att-class="{'task-gantt-today-column': isQuarter(quarter)}" t-att-style="'width: ' + scales.time_scale + 'px;'">
+                            <t t-esc="toFormat(quarter, 'q')"/>
+                        </span>
+                    </t>
+                </t>
+            </div>
+
+        </div>
+
+
+
+
+	</t>
+</templates>

@@ -4,8 +4,6 @@ import logging
 _logger = logging.getLogger(__name__)  # Need for message in console.
 
 
-
-
 class ResourceAps(models.Model):
     _inherit = 'resource.resource'
 

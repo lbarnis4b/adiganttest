@@ -1,0 +1,333 @@
+/* Gantt Resource Panel - Completely separate from main Gantt */
+
+.gantt-resource-panel {
+    background: #f8f9fa;
+    border-top: 2px solid #dddee1;
+    height: auto; /* Natural height - show all content */
+    display: flex;
+    flex-direction: column;
+    overflow-y: visible; /* Remove individual scroll, use parent container */
+    flex-shrink: 0; /* Don't shrink the resource panel */
+    overflow: visible; /* Make sure panel is fully visible */
+}
+
+.gantt-resource-header {
+    background: #edeef0;
+    border-bottom: 1px solid #dddee1;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+}
+
+.gantt-resource-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+}
+
+.gantt-resource-content {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+}
+
+/* Left side - Resource list */
+.gantt-resource-list {
+    background: #f8f9fa;
+    border-right: 1px solid #dddee1;
+    /* overflow-y: auto; */
+}
+
+.gantt-resource-items {
+    padding: 0;
+}
+
+.gantt-resource-item {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+    font-weight: 500;
+    color: #333;
+    padding: 8px 12px;
+    height: 25px;
+    line-height: 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.gantt-resource-item:hover {
+    background: #f0f0f0;
+}
+
+.gantt-resource-item-empty {
+    background: #fff;
+    border-bottom: 1px solid #eee;
+    font-size: 12px;
+    color: #999;
+    font-style: italic;
+    padding: 8px 12px;
+    height: 25px;
+    line-height: 25px;
+    text-align: center;
+}
+
+/* Right side - Timeline */
+.gantt-resource-timeline {
+    background: #fff;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    flex: 1;
+}
+
+.gantt-resource-timeline-inner {
+    min-height: 100%;
+    position: relative;
+}
+
+/* Resource rows */
+.gantt-resource-row {
+    position: relative;
+    height: 25px;
+}
+
+.gantt-resource-row-empty {
+    position: relative;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #999;
+    font-style: italic;
+    font-size: 12px;
+}
+
+/* Resource bars */
+.gantt-resource-bar {
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.3);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    transition: all 0.2s ease;
+    position: absolute;
+    height: 20px;
+    line-height: 20px;
+    margin-top: 2.5px;
+    text-align: center;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    background-color: #4CAF50;
+}
+
+.gantt-resource-bar:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    z-index: 10;
+}
+
+/* Problematic resources with date issues */
+.gantt-resource-item-issue {
+    background-color: #fff3cd !important; /* Light yellow background */
+    border-left: 4px solid #ffc107; /* Yellow border */
+    color: #856404;
+}
+
+.gantt-resource-item-issue:hover {
+    background-color: #ffeaa7 !important;
+}
+
+.gantt-resource-issue-indicator {
+    margin-left: 8px;
+    font-size: 12px;
+    color: #f39c12;
+}
+
+/* Problematic tasks with date issues - пунктирная линия */
+.gantt-resource-bar-issue {
+    background: linear-gradient(45deg, #fff3cd 0%, #ffeaa7 50%, #fff3cd 100%) !important;
+    border: 2px dashed #f39c12 !important;
+    color: #856404 !important;
+    opacity: 0.8;
+    font-style: italic;
+    font-weight: 600;
+    position: relative;
+}
+
+.gantt-resource-bar-issue::before {
+    content: "⚠️";
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 10px;
+}
+
+.gantt-resource-bar-issue:hover {
+    opacity: 1;
+    border-color: #e67e22 !important;
+    color: #d35400 !important;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(243, 156, 18, 0.4);
+}
+
+/* Resource rows should be above the grid */
+.gantt-resource-row {
+    position: relative;
+    z-index: 2;
+    background: transparent;
+}
+
+/* Custom styles for resource timeline head */
+.resource-timeline-head .task-gantt-bottom-column {
+    margin-top: 0 !important;
+    height: 100% !important;
+}
+
+.resource-timeline-head .task-gantt-scale-secondary {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 100%;
+    z-index: 1;
+}
+
+/* Hide text in resource timeline head */
+.resource-timeline-head .task-gantt-bottom-column span {
+    display: none !important;
+}
+
+/* Resource Hint Styles */
+.resource-hint-move {
+    position: absolute;
+    z-index: 1000;
+    white-space: nowrap;
+    padding: 8px 12px;
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 4px;
+    font: normal 12px/normal Verdana, Arial, Helvetica, sans-serif;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    max-width: 300px;
+    min-width: 150px;
+}
+
+.resource-hint-move li {
+    margin: 2px 0;
+    list-style: none;
+}
+
+.resource-hint-move.o_hidden {
+    display: none;
+}
+
+/* Resource Tips Container - аналогично основному tips */
+.resource-line-tips {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Resource Panel Hint Styles */
+.resource-panel-hint-move {
+    position: fixed;
+    z-index: 10000;
+    background: #fff;
+    border: 1px solid #dddee1;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    padding: 0;
+    min-width: 200px;
+    max-width: 350px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    transition: opacity 0.2s ease;
+}
+
+.resource-panel-hint-move.o_hidden {
+    display: none;
+}
+
+.resource-hint-content {
+    padding: 10px 12px;
+}
+
+.resource-hint-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 4px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.resource-hint-item:last-child {
+    border-bottom: none;
+}
+
+.resource-hint-key {
+    font-weight: 600;
+    color: #495057;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.resource-hint-value {
+    color: #6c757d;
+    text-align: right;
+    flex-grow: 1;
+    word-break: break-word;
+}
+
+/* Special styling for issue warnings */
+.resource-hint-item:has(.resource-hint-key:contains("Issue")) {
+    background-color: #fff3cd;
+    margin: -4px -12px;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.resource-hint-item:has(.resource-hint-key:contains("Issue")) .resource-hint-key {
+    color: #856404;
+}
+
+.resource-hint-item:has(.resource-hint-key:contains("Issue")) .resource-hint-value {
+    color: #856404;
+    font-weight: 500;
+}
+
+/* Simple hint style (single value) */
+.resource-hint-simple {
+    padding: 8px 0;
+    font-size: 13px;
+    color: #495057;
+}
+
+/* Hover effect for resource items when hint is shown */
+.gantt-resource-item:hover,
+.gantt-resource-bar:hover {
+    cursor: pointer;
+}
+
+/* Ensure hint appears above other elements */
+.gantt-resource-panel {
+    position: relative;
+}
+
+/* Animation for hint appearance */
+@keyframes fadeInHint {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.resource-panel-hint-move:not(.o_hidden) {
+    animation: fadeInHint 0.2s ease;
+} 

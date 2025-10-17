@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="native_gantt.TimelineArrowDraw" owl="1">
+
+        <div class="gantt_timeline_link" t-att-id="'gantt_timeline_link-' + this.state.predecessor.id">
+            <t t-foreach="state.path" t-as="path" t-key="path.id">
+
+                <div class="gantt_timeline_link_wrapper" t-att-style="'top:' + path.top + 'px;
+                                                                       left:' + path.left + 'px;
+                                                                       width:' + path.width + 'px;
+                                                                       height:' + path.height + 'px;
+                                                                       text-align: center;'">
+                    <t t-if="path.el_type === 'i'">
+                        <t t-if="path.el_fa === 'circle'">
+                            <i t-att-class="'fa fa-circle'" t-att-style="'font-size: 8px; vertical-align: 4px; color:' + path.color"></i>
+                        </t>
+
+                        <t t-if="path.el_fa === 'arrow'">
+                            <i t-att-class="'fa fa-arrow-' + path.dir" t-att-style="'font-size: 11px; vertical-align: 4px; color:' + path.color"></i>
+                        </t>
+
+                    </t>
+
+
+                    <t t-if="path.el_type === 'div'">
+                        <div t-att-style="'background-color:' + path.color + ';width:' + path.width + 'px;height:' + path.height + 'px;'">
+                            <div class="gantt_timeline_link_type" t-att-style="'color:' + path.color"></div>
+                        </div>
+                    </t>
+
+
+                </div>
+
+
+            </t>
+        </div>
+
+	</t>
+</templates>
+
+
+

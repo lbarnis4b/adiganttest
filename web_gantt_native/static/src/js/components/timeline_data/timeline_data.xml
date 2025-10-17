@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="native_gantt.TimeLineData" owl="1">
+
+        <t t-foreach="state.item_list" t-as="item" t-key="item.uniq">
+            <TimelineDataRow t-props="{item: item, timeline_data: this}" />
+        </t>
+
+<!--        <div class="task-gantt-timeline-ghost"></div>-->
+        <div class="task-gantt-timeline-load"></div>
+        <div class="task-gantt-timeline-load-bar"></div>
+        <div class="task-gantt-timeline-inter-section"></div>
+<!--        <div class="task-gantt-timeline-docs"></div>-->
+<!--        <div class="task-gantt-timeline-summary"></div>-->
+<!--        <div class="task-gantt-timeline-first"></div>-->
+	</t>
+</templates>
+
+
+

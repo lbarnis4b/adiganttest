@@ -1,11 +1,6 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
 import logging
-
-from datetime import datetime, timedelta
-
-
-
 _logger = logging.getLogger(__name__)  # Need for message in console.
 
 
@@ -115,24 +110,12 @@ class ProjectTaskNativeSchedulerCalendar(models.Model):
 
 
 
-    # Level
     def add_leave_level(self, cal_id, res_id, leave_ids, task_ids):
 
         dp_records = self.env['project.task.detail.plan'].sudo().search(
             [('resource_id', '=', res_id.id), ('task_id', 'not in', task_ids)])
 
         for dp_record in dp_records:
-            # leave_ids.append(
-            #     {
-            #         "leave_id": "dp{}".format(dp_record.id),
-            #         "calendar_id": str(cal_id.id),
-            #         "resource_id": str(res_id.id),
-            #         "name": dp_record.name,
-            #         "date_from": fields.Datetime.to_string(dp_record.data_from),
-            #         "date_to": fields.Datetime.to_string(dp_record.data_to),
-            #         "flag_task": None,
-            #         "flag_project": None
-            #     })
             leave_ids.append(
                 {
                     "leave_id": "dp{}".format(dp_record.id),

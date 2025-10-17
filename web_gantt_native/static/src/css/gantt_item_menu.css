@@ -1,0 +1,15 @@
+/* Gantt Item Menu Component - Minimal Odoo Style */
+
+.o_gantt_native_buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding-top: 4px;
+}
+
+/* Better spacing in the timeline header */
+.timeline-gantt-options {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}

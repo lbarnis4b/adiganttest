@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="native_gantt.TimeLineBar" owl="1">
+
+            <t t-if="!item.is_group">
+
+                <div t-att-class="itemClass(item)"
+                     t-att-style="'
+                         left:' + task_bar.left + 'px;
+                         width:'+ task_bar.width + 'px;
+                         background: ' + task_bar.color + ';
+                         position: absolute;'"
+                     t-att-id="'task-gantt-bar-plan-' + item.uniq"
+
+                     t-on-mouseover="(ev) => this.onMouseOver(item, ev)"
+                     t-on-mouseout="onMouseOut"
+                     >
+
+                    <!--BAR START-->
+                    <div t-attf-class="
+                        task-gantt-bar-plan-start
+                        ui-resizable-handle
+                        ui-resizable-w
+                        #{task_bar.width === 0 ? 'task-gantt-bar-plan-start-zer' : ''}
+                        "
+                        t-att-id="'task-gantt-bar-plan-start-' + item.uniq"
+                    >
+                    </div>
+
+                    <!--BAR END-->
+                    <div t-attf-class="
+                        task-gantt-bar-plan-end
+                        ui-resizable-handle
+                        ui-resizable-e
+                        #{task_bar.width === 0 ? 'task-gantt-bar-plan-end-zero' : ''}
+                        #{item.is_milestone === true ? 'fa fa-flag fa-1x' : '' }
+                        "
+                         t-att-id="'task-gantt-bar-plan-end-' + item.uniq">
+                            <TimeLineDocs t-props="{item:props.item}"/>
+                    </div>
+
+
+
+                    <div></div>
+
+                    <!--BAR INFO around-->
+                    <TimeLineBarInfo t-props="{item:props.item, timeline_data:this.timeline_data}"/>
+
+
+                    <!--WAIT-->
+<!--                    <div id="wait-div" t-ref="waitDiv" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 9999;">-->
+<!--                        <div id="spinner" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 16px solid #f3f3f3; border-radius: 50%; border-top: 16px solid #3498db; width: 120px; height: 120px; animation: spin 2s linear infinite;"></div>-->
+<!--                    </div>-->
+
+                    <!--ON GANTT-->
+                    <t t-if="item.on_gantt">
+                        <div class="task-gantt-name"
+                             t-esc="item.value_name"
+                             t-att-style="'width:' + (task_bar.width - 5) + 'px;'"></div>
+                    </t>
+
+                    <t t-if="!item.on_gantt and task_bar.progress.percentage">
+                        <div class="task-gantt-name"
+                             t-esc="task_bar.progress.percentage"
+                             t-att-style="'width:' + (task_bar.progress.percentage.width - 5) + 'px;'"></div>
+                    </t>
+
+                    <t t-if="task_bar.progress.percentage">
+                        <div class="task-gantt-progress"
+                             t-att-style="'width:' + task_bar.progress.percentage.width + 'px;'"></div>
+                    </t>
+
+                </div>
+            </t>
+
+
+	</t>
+</templates>
+
+
+

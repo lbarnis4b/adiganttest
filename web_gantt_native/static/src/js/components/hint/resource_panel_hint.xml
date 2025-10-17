@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="web_gantt_native.ResourcePanelHint" owl="1">
+        <div class="resource-panel-hint-move"
+             t-att-style="'left:' + state.left + 'px; top:' + state.top + 'px;'"
+             t-att-class="{'o_hidden': !state.isVisible}">
+            
+            <div class="resource-hint-content">
+                <t t-foreach="state.itemValue" t-as="item" t-key="item_index">
+                    <t t-if="item.key !== ''">
+                        <div class="resource-hint-item">
+                            <span class="resource-hint-key"><t t-esc="item.key"/>:</span>
+                            <span class="resource-hint-value"><t t-esc="item.value"/></span>
+                        </div>
+                    </t>
+                    <t t-else="">
+                        <div class="resource-hint-simple">
+                            <t t-esc="item.value"/>
+                        </div>
+                    </t>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

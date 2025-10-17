@@ -4,9 +4,22 @@
     "summary": """One price = web_gant_native, project_native, project_native_report_advance, project_native_exchange hr_holidays_gantt_native, mrp_gantt_native""",
     "category": "Project",
     "images": ['static/description/banner.gif'],
-    "version": "16.0.250210.0",
+    "version": "16.0.25.1016.00",
     "description": """
-        Gantt View for Project and Project Task
+        Gantt View for Project and Project Task (Odoo 16 Compatible)
+        
+        Features:
+        - Native Gantt chart for project tasks
+        - Task scheduling with dependencies
+        - Resource planning and allocation
+        - Critical path analysis
+        - WBS (Work Breakdown Structure) support
+        - Timeline and milestone management
+        
+        Version: Migrated from Odoo 17 to Odoo 16
+        - XML view syntax adapted for Odoo 16 compatibility
+        - Dependencies updated for Odoo 16
+        - Demo URL updated to demo16 environment
     """,
     "author": "Viktor Vorobjov",
     "license": "OPL-1",

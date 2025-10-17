@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="native_gantt.TimeLineRow" owl="1">
+
+            <div class="task-gantt-timeline-row" t-ref="task-gantt-timeline-row"
+                 t-att-id="state.item.is_group ? 'task-gantt-timeline-group-row-' + state.item.group_id[0] :
+                                              'task-gantt-timeline-row-' + state.item.id"
+                 t-on-mouseenter="handleMouseEnter" t-on-mouseleave="handleMouseLeave"
+                 t-att-class="{'task-gantt-timeline-row-hover': hoverState.hover}"
+                 t-att-style="state.item.fold ? 'display: none;' : ''"
+                 >
+
+
+                <TimelineGhostBar   t-props="{row: this, item:state.item}" />
+                <TimelineDataBar    t-props="{row: this, item:state.item}" />
+                <DeadlineSlider     t-props="{row: this, item:state.item }" />
+                <TimelineSummaryBar t-props="{row: this, item:state.item}" />
+                <TimelineFirst      t-props="{row: this, item:state.item}" />
+                <TimeLineBarLoad    t-props="{row: this, item:state.item }" />
+                <TimelineIntersection t-props="{row: this, item:state.item}" />
+
+            </div>
+
+	</t>
+</templates>
+
+
+

@@ -33,11 +33,15 @@
 
                                     <field name="fixed_calc_type"/>
 
-                                    <label for="plan_duration" attrs="{'invisible':['|',('schedule_mode', '=' ,'manual'), ('child_ids','!=', [])]}" string="Plan Duration"/>
-                                    <div attrs="{'invisible':['|',('schedule_mode', '=' ,'manual'), ('child_ids','!=', [])]}" >
+<!--                                    <label for="plan_duration" invisible="schedule_mode == 'manual' or  child_ids != []" string="Plan Duration"/>-->
+<!--                                    <div invisible="schedule_mode == 'manual' or  child_ids != []" >-->
+<!--                                        <field name="plan_duration" widget="time_delta" options="{'mask_humanize_field': 'duration_scale', 'mask_picker_field' : 'duration_picker'}"  class="oe_inline"/>-->
+<!--                                    </div>-->
+
+                                    <label for="plan_duration" attrs="{'invisible': [('schedule_mode', '=' ,'manual')]}" string="Plan Duration"/>
+                                    <div attrs="{'invisible': [('schedule_mode', '=' ,'manual')]}" >
                                         <field name="plan_duration" widget="time_delta" options="{'mask_humanize_field': 'duration_scale', 'mask_picker_field' : 'duration_picker'}"  class="oe_inline"/>
                                     </div>
-
 
                                     <field name="date_start" attrs="{'readonly': [('schedule_mode', '=', 'auto')]}" />
                                     <field name="date_end" attrs="{'readonly': [('schedule_mode', '=', 'auto')]}"/>
@@ -67,13 +71,15 @@
                                     <field name="constrain_date"/>
 
                                     <field name="color_gantt_set"/>
+<!--                                    <field name="color_gantt" invisible="color_gantt_set == False"/>-->
                                     <field name="color_gantt" widget="colorpicker" attrs="{'invisible': [('color_gantt_set', '=', False)]}"/>
 
 
                                     <field name="summary_date_start" invisible="1"/>
                                     <field name="summary_date_end" invisible="1"/>
                                     <field name="detail_plan"/>
-
+                                    <field name="wbs_code"/>
+                                    <field name="wbs_level"/>
 
                                 </group>
 
@@ -231,7 +237,11 @@
 
                         default_order="date_start asc"
 
-                        doc_count = "message_main_attachment_id"
+                        doc_count = "document_count"
+
+                        wbs_code = "wbs_code"
+                        wbs_level = "wbs_level"
+                        wbs_sequence = "wbs_sequence"
 
                 >
 
@@ -291,12 +301,13 @@
 
                             <group string="Tasks in Auto Mode" >
                                  <field name="scheduling_type" />
-                                 <field name="date_start" attrs="{'invisible':[('scheduling_type','=', 'backward')]}"/>
-                                 <field name="date_end"  attrs="{'invisible':[('scheduling_type','=', 'forward')]}"/>
+                                 <field name="date_start" attrs="{'invisible': [('scheduling_type', '=', 'backward')]}"/>
+                                 <field name="date_end"  attrs="{'invisible': [('scheduling_type', '=' , 'forward')]}"/>
                                  <field name="use_calendar" />
-                                 <field name="resource_calendar_id" attrs="{'invisible':[('use_calendar','=', False)]}"/>
+                                 <field name="resource_calendar_id" attrs="{'invisible': [('use_calendar', '=', False)]}"/>
                                  <field name="tz" widget="timezone_mismatch" options="{'tz_offset_field': 'tz_offset'}" readonly="0"/>
                                  <field name="tz_offset" invisible="1"/>
+                                 <field name="show_wbs" />
                             </group>
 
                             <group string="Default for Task" >
@@ -313,6 +324,15 @@
                                 <field name="duration_scale"/>
                                 <field name="duration_picker"/>
                             </group>
+
+                        <!-- Critical Path Analysis Section -->
+                        <group string="🎯 Critical Path Analysis" attrs="{'invisible': [('critical_path_count', '=', 0)]}">
+                            <div class="alert alert-info" role="alert">
+                                <strong>⚠️ Critical Tasks: <field name="critical_path_count" readonly="1" style="display: inline;"/></strong> | 
+                                <strong>📅 Duration: <field name="critical_path_duration" readonly="1" widget="time_delta" style="display: inline;"/></strong>
+                            </div>
+                            <field name="critical_path_summary" readonly="1" widget="text"/>
+                        </group>
 
                             <group name="critical_path" string="Critical Path">
                                 <field name="cp_shows"/>

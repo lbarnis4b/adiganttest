@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+    <t t-name="native_gantt.buttons" owl="1">
+        <div class="o_gantt_native_buttons">
+            <div class="btn-group btn-group-sm">
+                <button  type="button" class="task-gantt-today btn btn-primary btn-sm" t-on-click="handleClick">
+                    Today
+                </button>
+            </div>
+
+            <div class="btn-group btn-group-sm">
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-1h btn btn-default" t-on-click="handleClick">1H</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-2h btn btn-default" t-on-click="handleClick">2H</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-4h btn btn-default" t-on-click="handleClick">4H</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-8h btn btn-default" t-on-click="handleClick">8H</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-days btn btn-default" t-on-click="handleClick">Days</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-month btn btn-default" t-on-click="handleClick">Month</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-weeks btn btn-default" t-on-click="handleClick">Weeks</button>
+                <button type="button" class="task-gantt-zoom task-gantt-zoom-quarter btn btn-default" t-on-click="handleClick">Quarter</button>
+            </div>
+        </div>
+    </t>
+
+
+</templates>

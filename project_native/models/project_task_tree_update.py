@@ -1,11 +1,8 @@
+# -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-
 from operator import itemgetter
 
-
 import logging
-
-
 _logger = logging.getLogger(__name__)  # Need for message in console.
 
 
@@ -94,5 +91,10 @@ class ProjectTaskTreeUpdate(models.Model):
             task_obj = self.env['project.task']
             task_obj_search = task_obj.sudo().search([('id', '=', int(line["id"]))])
             task_obj_search.sudo().write(var_data)
+
+        # Recalculate WBS codes after sorting update
+        if project_id:
+            project_tasks = self.sudo().search([('project_id', '=', project_id)])
+            project_tasks._compute_wbs_code()
 
 

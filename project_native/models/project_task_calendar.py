@@ -1,26 +1,11 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, api, _
-import logging
-from lxml import etree
-
-import datetime
-from dateutil import tz
-import pytz
-import time
-from string import Template
-from datetime import datetime, timedelta
-from odoo.exceptions import  Warning
-from pdb import set_trace as bp
-
-from itertools import groupby
-from operator import itemgetter
-
 from odoo.exceptions import UserError
+import logging
+import pytz
+from datetime import datetime, timedelta
 
 _logger = logging.getLogger(__name__)  # Need for message in console.
-
-
-
 
 class ProjectTaskNativeCalendar(models.Model):
     _name = 'project.task'
@@ -82,10 +67,10 @@ class ProjectTaskNativeCalendar(models.Model):
                 obj_list.append(level[value])
 
         if type_op == "max" and obj_list:
-            # return fields.Datetime.to_string(max(obj_list))
+            # CALENDAR FIX: Use max datetime to find latest time across all calendar levels
             return max(obj_list)
         elif type_op == "min" and obj_list:
-            # return fields.Datetime.to_string(min(obj_list))
+            # CALENDAR FIX: Use min datetime to find earliest time across all calendar levels
             return min(obj_list)
         elif type_op == "list" and obj_list:
             return obj_list
@@ -133,6 +118,11 @@ class ProjectTaskNativeCalendar(models.Model):
     # 2
     def _get_planned_x(self, t_params, x_date, diff, level=None, tz_name=None, iteration=None, task=None,
                        direct=None):
+
+        # Iteration limits to prevent infinite loops
+        MAX_ITERATIONS = 3650  # ~10 years - hard limit
+        WARNING_THRESHOLD_1 = 365  # 1 year - first warning
+        WARNING_THRESHOLD_2 = 730  # 2 years - second warning
 
         level = level
 
@@ -257,6 +247,41 @@ class ProjectTaskNativeCalendar(models.Model):
 
             if next_step_allow and all(next_step_allow) and date_next:
                 iteration += 1
+
+                # Check iteration limits and log warnings
+                if iteration == WARNING_THRESHOLD_1:
+                    _logger.warning(
+                        f"Task scheduling warning: Task '{task.get('name', 'Unknown')}' (ID: {task.get('id', 'N/A')}) "
+                        f"has been searching for available time for {iteration} days (1 year). "
+                        f"This may indicate resource overload or circular dependencies."
+                    )
+                elif iteration == WARNING_THRESHOLD_2:
+                    _logger.warning(
+                        f"Task scheduling warning: Task '{task.get('name', 'Unknown')}' (ID: {task.get('id', 'N/A')}) "
+                        f"has been searching for {iteration} days (2 years). "
+                        f"Current date: {x_date_e}. Remaining work time per resource: {diff_e_counter}"
+                    )
+                elif iteration >= MAX_ITERATIONS:
+                    # Prepare diagnostic information
+                    resource_info = []
+                    for _res in task_res:
+                        res_id = _res["resource_id"]
+                        remaining = diff_e_counter.get(res_id, timedelta(0))
+                        resource_info.append(f"Resource {res_id}: {remaining} remaining")
+
+                    error_msg = (
+                        f"Cannot schedule task '{task.get('name', 'Unknown')}' (ID: {task.get('id', 'N/A')}). "
+                        f"Maximum iteration limit ({MAX_ITERATIONS} days) reached. "
+                        f"Current date: {x_date_e}. "
+                        f"This usually indicates:\n"
+                        f"1. Resource is fully booked for an extremely long period\n"
+                        f"2. Circular task dependencies\n"
+                        f"3. Task has invalid dates or dependencies\n"
+                        f"Resource status: {', '.join(resource_info)}"
+                    )
+                    _logger.error(error_msg)
+                    raise UserError(error_msg)
+
                 next_step = True
                 x_date_e = date_next
 
@@ -265,6 +290,7 @@ class ProjectTaskNativeCalendar(models.Model):
 
     def _check_leave(self, global_leave_ids, dt_work_from, dt_work_to, tz_name):
         """
+        Check if work period intersects with leave periods
 
         :param global_leave_ids:leaves for calendar
         :param dt_work_from: working from datetime
@@ -274,13 +300,21 @@ class ProjectTaskNativeCalendar(models.Model):
             True, False = Datetime period in leaves totaly
             False, list of new from and to Datetime = if need cut of from or to
             False, False = nothing need do, no leaves and cut of.
+
+        -------------------------------------------------
+            
+            Args:
+                global_leave_ids (list): List of leave periods
+                dt_work_from (datetime): Work period start
+                dt_work_to (datetime): Work period end
+                tz_name (str): Timezone name
+            
+            Returns:
+                tuple: (is_fully_in_leave, cut_period)
         """
         if tz_name:
             for global_leave_id in global_leave_ids:
-                # dt_leave_from = fields.Datetime.from_string(global_leave_id.date_from)
-                # dt_leave_to = fields.Datetime.from_string(global_leave_id.date_to)
-                # dt_leave_from = fields.Datetime.from_string(global_leave_id["date_from"])
-                # dt_leave_to = fields.Datetime.from_string(global_leave_id["date_to"])
+
                 dt_leave_from = global_leave_id["date_from"]
                 dt_leave_to = global_leave_id["date_to"]
 
@@ -288,19 +322,8 @@ class ProjectTaskNativeCalendar(models.Model):
                 dt_leave_to = self.to_tz(dt_leave_to, tz_name)
 
                 global_leave = not dt_leave_from > dt_work_from and not dt_leave_to < dt_work_to
-                # _logger.warning("-----------||-----------------")
-                # _logger.warning("")
-                # _logger.warning("is leave = {}".format(global_leave))
 
                 if not global_leave:
-                    # result1 = dt_leave_from <= dt_work_from and dt_leave_to.date() == dt_work_from.date()
-                    # result2 = dt_leave_to >= dt_work_to and dt_leave_from.date() == dt_work_to.date()
-                    #
-                    # _logger.warning("dt_leave_from {} <= dt_work_from {} = {}".format(dt_leave_from, dt_work_from, result1))
-                    # _logger.warning("dt_leave_to {} == dt_work_from {}".format(dt_leave_to.date(), dt_work_from.date()))
-                    # _logger.warning("")
-                    # _logger.warning("dt_leave_to {} >= dt_work_to {} = {}".format(dt_leave_to, dt_work_to, result2))
-                    # _logger.warning("dt_leave_from {} == dt_work_to {}".format(dt_leave_from.date(), dt_work_to.date()))
 
                     #change from
                     new_dt_work_from = dt_work_from
@@ -319,10 +342,6 @@ class ProjectTaskNativeCalendar(models.Model):
                             # _logger.warning("{} = {}".format(type(td_to), td_to))
 
                     if new_dt_work_from != dt_work_from or new_dt_work_to != dt_work_to:
-                        # _logger.warning("-- --")
-                        # _logger.warning(new_dt_work_from)
-                        # _logger.warning(new_dt_work_to)
-
                         return False,   {
                                             "name": global_leave_id["name"],
                                             "from": new_dt_work_from,
@@ -336,15 +355,6 @@ class ProjectTaskNativeCalendar(models.Model):
 
 
     def _attendance_from_list(self, els, wkd, start_date):
-        _list = []
-
-        # search_objs = filter(lambda x: x['dayofweek'] == str(wkd)
-        #                                and not (x['date_from'] and x['date_from'] < start_date)
-        #                                and not (x['date_to'] and x['date_to'] < start_date)
-        #                                and x['calendar_id'] == cal_id
-        #                                , els)
-
-        # start_date = start_date.replace(hour=0, minute=0, second=0)
         _list = []
 
         for x in els:
@@ -433,7 +443,7 @@ class ProjectTaskNativeCalendar(models.Model):
         return hour_from, hour_to
 
 
-    # need more test
+
     def check_load_control(self, _load_control, _calendar_id, _resource_id, global_leave_ids_param, direct,
                            flag_task, flag_project):
 
@@ -616,15 +626,19 @@ class ProjectTaskNativeCalendar(models.Model):
 
 
     def _get_planned_interval_next_date(self, day_before, direct="normal"):
+        # Protection against date overflow (max date is 9999-12-31)
+        MAX_DATE = datetime(9999, 12, 30)
 
         if direct == "normal":
+            if day_before >= MAX_DATE:
+                _logger.error("Cannot calculate next date: reached maximum date limit (9999-12-30)")
+                return None
             start_date = (day_before + timedelta(days=1)).replace(hour=0, minute=0, second=0, microsecond=00)
             return start_date
 
         if direct == "revers":
             end_date = (day_before - timedelta(days=1)).replace(hour=23, minute=59, second=59, microsecond=00)
             return end_date
-
 
 
 
